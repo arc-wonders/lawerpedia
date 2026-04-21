@@ -1,29 +1,225 @@
 import { useState, useEffect } from 'react';
 import { X, Menu, Scale, Briefcase, FileText, Users, Calendar, Instagram, Linkedin, Twitter, Mail, Phone, MapPin, Award, BookOpen, Video, Bell, ChevronRight, Gavel, Shield, Building2, UserCheck, ClipboardCheck, TrendingUp, Eye } from 'lucide-react';
 import mehakImage from '../imports/ms.jpg';
+import ConsultationForm from './components/ConsultationForm';
 
-export default function App() {
+interface Conclave {
+  id: number;
+  title: string;
+  date: string;
+  status: string;
+  attendees: string;
+  description: string;
+  fullDescription: string;
+  highlights: string[];
+  venue: string;
+  time: string;
+}
+
+export default function MainSite() {
   const [showModal, setShowModal] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [selectedConclave, setSelectedConclave] = useState<number | null>(null);
+  const [showConsultationForm, setShowConsultationForm] = useState(false);
+  const [conclaves, setConclaves] = useState<Conclave[]>([]);
 
   useEffect(() => {
     setShowModal(true);
   }, []);
 
+  useEffect(() => {
+    // Load conclaves from localStorage
+    const stored = localStorage.getItem('lawyerpedia_conclaves');
+    if (stored) {
+      setConclaves(JSON.parse(stored));
+    } else {
+      // Set default conclaves if none exist
+      const defaultConclaves: Conclave[] = [
+    {
+      id: 1,
+      title: "Legal Awareness Conclave 2026",
+      date: "June 15, 2026",
+      status: "upcoming",
+      attendees: "Expected 600+",
+      description: "A comprehensive event covering consumer rights, criminal law basics, and legal remedies for common issues.",
+      fullDescription: "Join us for India's premier legal awareness conclave, designed to empower individuals with knowledge of their legal rights and remedies. This comprehensive event will feature expert speakers, interactive workshops, and networking opportunities with legal professionals from across the country.",
+      highlights: [
+        "Expert panel discussions on consumer protection laws",
+        "Interactive workshops on criminal law basics",
+        "Legal aid clinic with free consultations",
+        "Networking opportunities with legal professionals",
+        "Certificate of participation"
+      ],
+      venue: "India Habitat Centre, New Delhi",
+      time: "9:00 AM - 6:00 PM"
+    },
+    {
+      id: 2,
+      title: "Corporate Law Summit 2025",
+      date: "November 12, 2025",
+      status: "past",
+      attendees: "500+",
+      description: "Successfully conducted summit on startup legal compliance, attended by 500+ entrepreneurs and legal professionals.",
+      fullDescription: "Our Corporate Law Summit brought together leading entrepreneurs, legal experts, and policymakers to discuss the evolving landscape of startup legal compliance in India. The event featured keynote speeches, panel discussions, and hands-on workshops.",
+      highlights: [
+        "Keynote by prominent startup lawyers",
+        "Panel on recent regulatory changes",
+        "Workshops on incorporation and compliance",
+        "Investor-founder legal relationship sessions",
+        "Networking with 500+ attendees"
+      ],
+      venue: "The Leela Ambience, Gurugram",
+      time: "Full Day Event"
+    },
+    {
+      id: 3,
+      title: "Women's Legal Rights Workshop",
+      date: "August 20, 2025",
+      status: "past",
+      attendees: "300+",
+      description: "Empowering workshop focusing on women's legal rights, property laws, and domestic violence protection.",
+      fullDescription: "An empowering day dedicated to educating women about their legal rights in India. This workshop covered crucial topics including property rights, matrimonial laws, workplace harassment, and domestic violence protection mechanisms.",
+      highlights: [
+        "Sessions on property and inheritance rights",
+        "Understanding domestic violence laws",
+        "Workplace harassment prevention",
+        "Legal aid resources and support systems",
+        "One-on-one legal counseling"
+      ],
+      venue: "India International Centre, New Delhi",
+      time: "10:00 AM - 5:00 PM"
+    }
+      ];
+      setConclaves(defaultConclaves);
+      localStorage.setItem('lawyerpedia_conclaves', JSON.stringify(defaultConclaves));
+    }
+  }, []);
+
+  useEffect(() => {
+    if (selectedConclave !== null) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [selectedConclave]);
+
   return (
     <div className="min-h-screen bg-[#0A0A0A] relative" style={{ fontFamily: 'Inter, sans-serif' }}>
-      {/* Background Dots Pattern */}
-      <div className="fixed inset-0 pointer-events-none z-0" style={{
-        backgroundImage: 'radial-gradient(circle, rgba(212, 175, 55, 0.08) 1.5px, transparent 1.5px)',
-        backgroundSize: '40px 40px',
-        opacity: 0.5
-      }} />
+      {/* CONCLAVE DETAILS OVERLAY */}
+      {selectedConclave !== null && (
+        <div className="fixed inset-0 z-50 bg-[#0A0A0A] overflow-y-auto">
+          <div className="min-h-screen">
+            {/* Header with Back Button */}
+            <div className="sticky top-0 z-10 bg-[#0A0A0A]/95 backdrop-blur-xl border-b border-[#D4AF37]/10">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                <button
+                  onClick={() => setSelectedConclave(null)}
+                  className="inline-flex items-center gap-2 text-gray-400 hover:text-[#D4AF37] transition-colors group"
+                >
+                  <ChevronRight className="w-5 h-5 rotate-180 group-hover:-translate-x-1 transition-transform" />
+                  <span>Back to Conclaves</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 lg:py-32">
+              <div className="space-y-12">
+                {/* Hero Section */}
+                <div className="text-center space-y-6">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#D4AF37]/10 to-transparent rounded-full border border-[#D4AF37]/20">
+                    <Calendar className="w-4 h-4 text-[#D4AF37]" />
+                    <span className="text-[#D4AF37] text-sm">
+                      {conclaves[selectedConclave].status === 'upcoming' ? 'Upcoming Event' : 'Past Event'}
+                    </span>
+                  </div>
+                  <h1 className="text-4xl sm:text-5xl lg:text-6xl text-[#F5F5F5] leading-tight" style={{ fontFamily: 'Playfair Display, serif', fontWeight: '600' }}>
+                    {conclaves[selectedConclave].title}
+                  </h1>
+                  <div className="flex items-center justify-center gap-8 flex-wrap text-gray-400">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-5 h-5 text-[#D4AF37]" />
+                      <span>{conclaves[selectedConclave].date}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Users className="w-5 h-5 text-[#D4AF37]" />
+                      <span>{conclaves[selectedConclave].attendees} Attendees</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-5 h-5 text-[#D4AF37]" />
+                      <span>{conclaves[selectedConclave].venue}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Image Banner */}
+                <div className="relative aspect-video bg-gradient-to-br from-[#1A1A1A] to-[#0A0A0A] rounded-2xl overflow-hidden border border-[#D4AF37]/20">
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Calendar className="w-32 h-32 text-[#D4AF37]/20" />
+                  </div>
+                </div>
+
+                {/* Description */}
+                <div className="bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] rounded-2xl border border-[#D4AF37]/20 p-8 sm:p-10 lg:p-12">
+                  <h2 className="text-2xl sm:text-3xl text-[#F5F5F5] mb-6" style={{ fontFamily: 'Playfair Display, serif', fontWeight: '600' }}>
+                    About This Event
+                  </h2>
+                  <p className="text-gray-400 text-base sm:text-lg leading-relaxed mb-8">
+                    {conclaves[selectedConclave].fullDescription}
+                  </p>
+
+                  <div className="grid sm:grid-cols-2 gap-6 mb-8">
+                    <div className="flex items-center gap-3 p-4 bg-[#0A0A0A]/50 rounded-lg border border-[#D4AF37]/10">
+                      <MapPin className="w-6 h-6 text-[#D4AF37] flex-shrink-0" />
+                      <div>
+                        <div className="text-xs text-gray-500 mb-1">Venue</div>
+                        <div className="text-[#F5F5F5]">{conclaves[selectedConclave].venue}</div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 p-4 bg-[#0A0A0A]/50 rounded-lg border border-[#D4AF37]/10">
+                      <Award className="w-6 h-6 text-[#D4AF37] flex-shrink-0" />
+                      <div>
+                        <div className="text-xs text-gray-500 mb-1">Time</div>
+                        <div className="text-[#F5F5F5]">{conclaves[selectedConclave].time}</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <h3 className="text-xl text-[#F5F5F5] mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>
+                    Event Highlights
+                  </h3>
+                  <ul className="space-y-3">
+                    {conclaves[selectedConclave].highlights.map((highlight, index) => (
+                      <li key={index} className="flex items-start gap-3 text-gray-400">
+                        <ChevronRight className="w-5 h-5 text-[#D4AF37] flex-shrink-0 mt-0.5" />
+                        <span>{highlight}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* CTA */}
+                {conclaves[selectedConclave].status === 'upcoming' && (
+                  <div className="text-center">
+                    <button className="px-10 py-4 bg-gradient-to-r from-[#D4AF37] to-[#F4D03F] text-black rounded-lg hover:shadow-[0_0_40px_rgba(212,175,55,0.4)] transition-all duration-300 hover:scale-105">
+                      Register for This Event
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* GLOBAL POP-UP MODAL */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 relative">
           <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setShowModal(false)} />
-          <div className="relative bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] rounded-2xl shadow-2xl max-w-lg w-full p-10 border border-[#D4AF37]/20">
+          <div className="relative bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] rounded-2xl shadow-2xl max-w-lg w-full p-6 sm:p-5 sm:p-6 lg:p-8 lg:p-10 border border-[#D4AF37]/20">
             <div className="absolute -top-px left-1/2 -translate-x-1/2 w-32 h-px bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent" />
             <button
               onClick={() => setShowModal(false)}
@@ -35,7 +231,7 @@ export default function App() {
               <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-[#D4AF37]/20 to-[#D4AF37]/5 rounded-full mb-6 border border-[#D4AF37]/30">
                 <Calendar className="w-10 h-10 text-[#D4AF37]" />
               </div>
-              <h2 className="mb-4 text-[#F5F5F5]" style={{ fontFamily: 'Playfair Display, serif', fontSize: '2rem' }}>Upcoming Legal Conclave 2026</h2>
+              <h2 className="mb-4 text-[#F5F5F5] text-2xl sm:text-3xl" style={{ fontFamily: 'Playfair Display, serif' }}>Upcoming Legal Conclave 2026</h2>
               <p className="text-gray-400 mb-8 leading-relaxed text-[15px]">
                 Join India's premier legal awareness conclave. Connect with legal experts, attend workshops, and empower yourself with knowledge of your rights and remedies.
               </p>
@@ -67,14 +263,17 @@ export default function App() {
               <span className="text-2xl text-[#F5F5F5] tracking-tight" style={{ fontFamily: 'Playfair Display, serif' }}>LawyerPedia</span>
             </div>
 
-            <div className="hidden md:flex items-center gap-10">
+            <div className="hidden md:flex items-center gap-6 sm:p-5 sm:p-6 lg:p-8 lg:p-10">
               <a href="#home" className="text-gray-400 hover:text-[#D4AF37] transition-colors text-[15px]">Home</a>
               <a href="#about" className="text-gray-400 hover:text-[#D4AF37] transition-colors text-[15px]">About</a>
               <a href="#articles" className="text-gray-400 hover:text-[#D4AF37] transition-colors text-[15px]">Articles</a>
               <a href="#conclaves" className="text-gray-400 hover:text-[#D4AF37] transition-colors text-[15px]">Conclaves</a>
               <a href="#gallery" className="text-gray-400 hover:text-[#D4AF37] transition-colors text-[15px]">Gallery</a>
               <a href="#contact" className="text-gray-400 hover:text-[#D4AF37] transition-colors text-[15px]">Contact</a>
-              <button className="px-7 py-3 bg-gradient-to-r from-[#D4AF37] to-[#F4D03F] text-black rounded-lg hover:shadow-[0_0_30px_rgba(212,175,55,0.3)] transition-all duration-300 hover:scale-105">
+              <button
+                onClick={() => setShowConsultationForm(true)}
+                className="px-7 py-3 bg-gradient-to-r from-[#D4AF37] to-[#F4D03F] text-black rounded-lg hover:shadow-[0_0_30px_rgba(212,175,55,0.3)] transition-all duration-300 hover:scale-105"
+              >
                 Book Consultation
               </button>
             </div>
@@ -98,7 +297,10 @@ export default function App() {
               <a href="#conclaves" className="block text-gray-400 hover:text-[#D4AF37] py-2 text-[15px]">Conclaves</a>
               <a href="#gallery" className="block text-gray-400 hover:text-[#D4AF37] py-2 text-[15px]">Gallery</a>
               <a href="#contact" className="block text-gray-400 hover:text-[#D4AF37] py-2 text-[15px]">Contact</a>
-              <button className="w-full px-7 py-3 bg-gradient-to-r from-[#D4AF37] to-[#F4D03F] text-black rounded-lg hover:shadow-[0_0_30px_rgba(212,175,55,0.3)] transition-all">
+              <button
+                onClick={() => { setShowConsultationForm(true); setMobileMenuOpen(false); }}
+                className="w-full px-7 py-3 bg-gradient-to-r from-[#D4AF37] to-[#F4D03F] text-black rounded-lg hover:shadow-[0_0_30px_rgba(212,175,55,0.3)] transition-all"
+              >
                 Book Consultation
               </button>
             </div>
@@ -107,40 +309,40 @@ export default function App() {
       </nav>
 
       {/* HERO SECTION */}
-      <section id="home" className="relative bg-gradient-to-br from-[#0A0A0A] via-[#0F0F0F] to-[#0A0A0A] py-24 lg:py-40 overflow-hidden z-10">
+      <section id="home" className="relative bg-gradient-to-br from-[#0A0A0A] via-[#0F0F0F] to-[#0A0A0A] py-16 sm:py-24 lg:py-40 overflow-hidden z-10">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-[#D4AF37]/5 via-transparent to-transparent" />
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgyMTIsMTc1LDU1LDAuMDMpIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-30" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
+          <div className="grid lg:grid-cols-2 gap-5 sm:p-6 lg:p-8 sm:gap-12 lg:gap-16 items-center">
             <div className="space-y-8">
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#D4AF37]/10 to-transparent rounded-full border border-[#D4AF37]/20">
                 <span className="text-[#D4AF37] text-sm">Premium Legal Services</span>
               </div>
 
-              <h1 className="text-[#F5F5F5] leading-[1.1]" style={{ fontFamily: 'Playfair Display, serif', fontSize: '4.5rem', fontWeight: '600', letterSpacing: '-0.02em' }}>
+              <h1 className="text-[#F5F5F5] leading-[1.1] text-4xl sm:text-5xl lg:text-[4.5rem]" style={{ fontFamily: 'Playfair Display, serif', fontWeight: '600', letterSpacing: '-0.02em' }}>
                 Empowering Legal
                 <span className="block bg-gradient-to-r from-[#D4AF37] to-[#F4D03F] bg-clip-text text-transparent">Awareness</span>
               </h1>
 
-              <p className="text-gray-400 text-lg leading-relaxed max-w-lg">
+              <p className="text-gray-400 text-base sm:text-lg leading-relaxed max-w-lg">
                 LawyerPedia is your trusted partner in legal education and advocacy. We bridge the gap between complex legal concepts and public understanding through expert articles, engaging content, and transformative conclaves.
               </p>
 
-              <div className="flex items-center gap-8 pt-4">
+              <div className="flex items-center gap-4 sm:gap-5 sm:p-6 lg:p-8 pt-4 flex-wrap sm:flex-nowrap">
                 <div className="text-center">
-                  <div className="text-3xl mb-1 bg-gradient-to-r from-[#D4AF37] to-[#F4D03F] bg-clip-text text-transparent" style={{ fontFamily: 'Playfair Display, serif' }}>500K+</div>
-                  <div className="text-gray-500 text-sm">Followers Reached</div>
+                  <div className="text-2xl sm:text-3xl mb-1 bg-gradient-to-r from-[#D4AF37] to-[#F4D03F] bg-clip-text text-transparent" style={{ fontFamily: 'Playfair Display, serif' }}>500K+</div>
+                  <div className="text-gray-500 text-xs sm:text-sm">Followers Reached</div>
                 </div>
-                <div className="w-px h-12 bg-[#D4AF37]/20" />
+                <div className="w-px h-10 sm:h-12 bg-[#D4AF37]/20" />
                 <div className="text-center">
-                  <div className="text-3xl mb-1 bg-gradient-to-r from-[#D4AF37] to-[#F4D03F] bg-clip-text text-transparent" style={{ fontFamily: 'Playfair Display, serif' }}>1M+</div>
-                  <div className="text-gray-500 text-sm">Content Views</div>
+                  <div className="text-2xl sm:text-3xl mb-1 bg-gradient-to-r from-[#D4AF37] to-[#F4D03F] bg-clip-text text-transparent" style={{ fontFamily: 'Playfair Display, serif' }}>1M+</div>
+                  <div className="text-gray-500 text-xs sm:text-sm">Content Views</div>
                 </div>
-                <div className="w-px h-12 bg-[#D4AF37]/20" />
+                <div className="w-px h-10 sm:h-12 bg-[#D4AF37]/20" />
                 <div className="text-center">
-                  <div className="text-3xl mb-1 bg-gradient-to-r from-[#D4AF37] to-[#F4D03F] bg-clip-text text-transparent" style={{ fontFamily: 'Playfair Display, serif' }}>25+</div>
-                  <div className="text-gray-500 text-sm">Events Hosted</div>
+                  <div className="text-2xl sm:text-3xl mb-1 bg-gradient-to-r from-[#D4AF37] to-[#F4D03F] bg-clip-text text-transparent" style={{ fontFamily: 'Playfair Display, serif' }}>25+</div>
+                  <div className="text-gray-500 text-xs sm:text-sm">Events Hosted</div>
                 </div>
               </div>
 
@@ -174,18 +376,18 @@ export default function App() {
                 </div>
               </div>
               <div className="absolute -bottom-8 -left-8 w-64 h-64 bg-[#D4AF37]/10 rounded-full blur-3xl -z-10" />
-              <div className="absolute -top-8 -right-8 w-48 h-48 bg-[#D4AF37]/5 rounded-full blur-2xl -z-10" />
+              <div className="absolute -top-5 sm:p-6 lg:p-8 -right-8 w-48 h-48 bg-[#D4AF37]/5 rounded-full blur-2xl -z-10" />
             </div>
           </div>
         </div>
       </section>
 
       {/* ABOUT MEHAK AHUJA */}
-      <section id="about" className="py-32 bg-gradient-to-br from-[#0F0F0F] to-[#0A0A0A] relative overflow-hidden z-10">
+      <section id="about" className="py-16 sm:py-24 lg:py-32 bg-gradient-to-br from-[#0F0F0F] to-[#0A0A0A] relative overflow-hidden z-10">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-[#D4AF37]/5 via-transparent to-transparent" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="grid lg:grid-cols-2 gap-20 items-center">
+          <div className="grid lg:grid-cols-2 gap-5 sm:p-6 lg:p-8 sm:gap-12 lg:gap-20 items-center">
             <div className="relative order-2 lg:order-1 max-w-sm mx-auto lg:mx-0">
               <div className="absolute inset-0 bg-gradient-to-br from-[#D4AF37]/20 via-transparent to-transparent rounded-full blur-3xl" />
               <div className="relative aspect-[3/4] bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] rounded-3xl overflow-hidden border border-[#D4AF37]/20 shadow-[0_20px_80px_rgba(212,175,55,0.25)]">
@@ -194,12 +396,15 @@ export default function App() {
                   <img
                     src={mehakImage}
                     alt="Mehak Ahuja - Founder & Legal Expert"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover select-none"
+                    draggable={false}
+                    onContextMenu={(e) => e.preventDefault()}
+                    style={{ userSelect: 'none', WebkitUserSelect: 'none', MozUserSelect: 'none' }}
                   />
                 </div>
               </div>
               <div className="absolute -bottom-12 -right-12 w-64 h-64 bg-[#D4AF37]/10 rounded-full blur-3xl -z-10" />
-              <div className="absolute -top-8 -left-8 w-48 h-48 bg-[#D4AF37]/5 rounded-full blur-2xl -z-10" />
+              <div className="absolute -top-5 sm:p-6 lg:p-8 -left-8 w-48 h-48 bg-[#D4AF37]/5 rounded-full blur-2xl -z-10" />
             </div>
 
             <div className="space-y-8 order-1 lg:order-2">
@@ -215,16 +420,16 @@ export default function App() {
               </div>
 
               <div className="space-y-6">
-                <p className="text-gray-400 text-lg leading-relaxed">
+                <p className="text-gray-400 text-base sm:text-lg leading-relaxed">
                   Mehak Ahuja is a distinguished legal professional with a passion for democratizing legal knowledge. With years of experience in diverse practice areas, she founded LawyerPedia with a vision to make legal awareness accessible to all.
                 </p>
-                <p className="text-gray-400 text-lg leading-relaxed">
+                <p className="text-gray-400 text-base sm:text-lg leading-relaxed">
                   Her expertise spans corporate law, civil disputes, and legal compliance. Through her innovative approach combining traditional legal practice with modern digital outreach, she has empowered thousands to understand their legal rights and responsibilities.
                 </p>
 
                 <div className="relative p-6 bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] rounded-2xl border border-[#D4AF37]/20 mt-8">
                   <div className="absolute -top-px left-1/2 -translate-x-1/2 w-32 h-px bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent" />
-                  <p className="text-[#F5F5F5] text-xl italic mb-4 leading-relaxed" style={{ fontFamily: 'Playfair Display, serif' }}>
+                  <p className="text-[#F5F5F5] text-lg sm:text-xl italic mb-4 leading-relaxed" style={{ fontFamily: 'Playfair Display, serif' }}>
                     "My mission is to empower every individual with the knowledge of their legal rights, creating a more just and informed society."
                   </p>
                   <div className="flex items-center gap-3">
@@ -234,18 +439,18 @@ export default function App() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-6 pt-4">
-                <div className="text-center p-6 bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 transition-all duration-300 hover:shadow-[0_0_30px_rgba(212,175,55,0.15)] hover:scale-105">
-                  <div className="text-4xl mb-2 bg-gradient-to-r from-[#D4AF37] to-[#F4D03F] bg-clip-text text-transparent" style={{ fontFamily: 'Playfair Display, serif' }}>10+</div>
-                  <div className="text-gray-500 text-sm">Years Experience</div>
+              <div className="grid grid-cols-3 gap-3 sm:gap-6 pt-4">
+                <div className="text-center p-4 sm:p-6 bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 transition-all duration-300 hover:shadow-[0_0_30px_rgba(212,175,55,0.15)] hover:scale-105">
+                  <div className="text-2xl sm:text-3xl lg:text-4xl mb-2 bg-gradient-to-r from-[#D4AF37] to-[#F4D03F] bg-clip-text text-transparent" style={{ fontFamily: 'Playfair Display, serif' }}>10+</div>
+                  <div className="text-gray-500 text-xs sm:text-sm">Years Experience</div>
                 </div>
-                <div className="text-center p-6 bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 transition-all duration-300 hover:shadow-[0_0_30px_rgba(212,175,55,0.15)] hover:scale-105">
-                  <div className="text-4xl mb-2 bg-gradient-to-r from-[#D4AF37] to-[#F4D03F] bg-clip-text text-transparent" style={{ fontFamily: 'Playfair Display, serif' }}>500+</div>
-                  <div className="text-gray-500 text-sm">Cases Handled</div>
+                <div className="text-center p-4 sm:p-6 bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 transition-all duration-300 hover:shadow-[0_0_30px_rgba(212,175,55,0.15)] hover:scale-105">
+                  <div className="text-2xl sm:text-3xl lg:text-4xl mb-2 bg-gradient-to-r from-[#D4AF37] to-[#F4D03F] bg-clip-text text-transparent" style={{ fontFamily: 'Playfair Display, serif' }}>500+</div>
+                  <div className="text-gray-500 text-xs sm:text-sm">Cases Handled</div>
                 </div>
-                <div className="text-center p-6 bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 transition-all duration-300 hover:shadow-[0_0_30px_rgba(212,175,55,0.15)] hover:scale-105">
-                  <div className="text-4xl mb-2 bg-gradient-to-r from-[#D4AF37] to-[#F4D03F] bg-clip-text text-transparent" style={{ fontFamily: 'Playfair Display, serif' }}>25+</div>
-                  <div className="text-gray-500 text-sm">Conclaves</div>
+                <div className="text-center p-4 sm:p-6 bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 transition-all duration-300 hover:shadow-[0_0_30px_rgba(212,175,55,0.15)] hover:scale-105">
+                  <div className="text-2xl sm:text-3xl lg:text-4xl mb-2 bg-gradient-to-r from-[#D4AF37] to-[#F4D03F] bg-clip-text text-transparent" style={{ fontFamily: 'Playfair Display, serif' }}>25+</div>
+                  <div className="text-gray-500 text-xs sm:text-sm">Conclaves</div>
                 </div>
               </div>
             </div>
@@ -254,16 +459,16 @@ export default function App() {
       </section>
 
       {/* ABOUT LAWYERPEDIA */}
-      <section className="py-32 bg-[#0A0A0A] relative overflow-hidden z-10">
+      <section className="py-16 sm:py-24 lg:py-32 bg-[#0A0A0A] relative overflow-hidden z-10">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#D4AF37]/5 via-transparent to-transparent" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="text-center mb-20">
+          <div className="text-center mb-12 sm:mb-10 sm:mb-12 lg:mb-16 lg:mb-20">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#D4AF37]/10 to-transparent rounded-full border border-[#D4AF37]/20 mb-6">
               <Scale className="w-4 h-4 text-[#D4AF37]" />
               <span className="text-[#D4AF37] text-sm">Our Platform</span>
             </div>
-            <h2 className="mb-6 text-[#F5F5F5]" style={{ fontFamily: 'Playfair Display, serif', fontSize: '3.5rem', fontWeight: '600' }}>About LawyerPedia</h2>
+            <h2 className="mb-6 text-[#F5F5F5] text-3xl sm:text-4xl lg:text-5xl" style={{ fontFamily: 'Playfair Display, serif', fontWeight: '600' }}>About LawyerPedia</h2>
             <div className="flex items-center justify-center gap-3 mb-8">
               <div className="w-24 h-px bg-gradient-to-r from-transparent to-[#D4AF37]" />
               <div className="w-24 h-px bg-gradient-to-l from-transparent to-[#D4AF37]" />
@@ -273,42 +478,42 @@ export default function App() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="text-center p-10 bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 transition-all duration-300 hover:shadow-[0_0_40px_rgba(212,175,55,0.2)] hover:scale-105 group">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5 sm:p-6 lg:p-8">
+            <div className="text-center p-6 sm:p-5 sm:p-6 lg:p-8 lg:p-10 bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 transition-all duration-300 hover:shadow-[0_0_40px_rgba(212,175,55,0.2)] hover:scale-105 group">
               <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-[#D4AF37]/20 to-[#D4AF37]/5 rounded-2xl mb-6 group-hover:shadow-[0_0_30px_rgba(212,175,55,0.3)] transition-all duration-300 border border-[#D4AF37]/30">
                 <BookOpen className="w-10 h-10 text-[#D4AF37] group-hover:scale-110 transition-transform" />
               </div>
-              <h3 className="mb-4 text-[#F5F5F5]" style={{ fontFamily: 'Playfair Display, serif', fontSize: '1.5rem' }}>Articles</h3>
+              <h3 className="mb-4 text-[#F5F5F5] text-xl sm:text-2xl" style={{ fontFamily: 'Playfair Display, serif' }}>Articles</h3>
               <p className="text-gray-400 text-sm leading-relaxed">
                 Expert-written legal articles covering diverse topics, making complex laws understandable for everyone.
               </p>
             </div>
 
-            <div className="text-center p-10 bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 transition-all duration-300 hover:shadow-[0_0_40px_rgba(212,175,55,0.2)] hover:scale-105 group">
+            <div className="text-center p-6 sm:p-5 sm:p-6 lg:p-8 lg:p-10 bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 transition-all duration-300 hover:shadow-[0_0_40px_rgba(212,175,55,0.2)] hover:scale-105 group">
               <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-[#D4AF37]/20 to-[#D4AF37]/5 rounded-2xl mb-6 group-hover:shadow-[0_0_30px_rgba(212,175,55,0.3)] transition-all duration-300 border border-[#D4AF37]/30">
                 <Video className="w-10 h-10 text-[#D4AF37] group-hover:scale-110 transition-transform" />
               </div>
-              <h3 className="mb-4 text-[#F5F5F5]" style={{ fontFamily: 'Playfair Display, serif', fontSize: '1.5rem' }}>Legal Reels</h3>
+              <h3 className="mb-4 text-[#F5F5F5] text-xl sm:text-2xl" style={{ fontFamily: 'Playfair Display, serif' }}>Legal Reels</h3>
               <p className="text-gray-400 text-sm leading-relaxed">
                 Engaging short-form video content on Instagram, breaking down legal concepts in digestible formats.
               </p>
             </div>
 
-            <div className="text-center p-10 bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 transition-all duration-300 hover:shadow-[0_0_40px_rgba(212,175,55,0.2)] hover:scale-105 group">
+            <div className="text-center p-6 sm:p-5 sm:p-6 lg:p-8 lg:p-10 bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 transition-all duration-300 hover:shadow-[0_0_40px_rgba(212,175,55,0.2)] hover:scale-105 group">
               <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-[#D4AF37]/20 to-[#D4AF37]/5 rounded-2xl mb-6 group-hover:shadow-[0_0_30px_rgba(212,175,55,0.3)] transition-all duration-300 border border-[#D4AF37]/30">
                 <Calendar className="w-10 h-10 text-[#D4AF37] group-hover:scale-110 transition-transform" />
               </div>
-              <h3 className="mb-4 text-[#F5F5F5]" style={{ fontFamily: 'Playfair Display, serif', fontSize: '1.5rem' }}>Conclaves</h3>
+              <h3 className="mb-4 text-[#F5F5F5] text-xl sm:text-2xl" style={{ fontFamily: 'Playfair Display, serif' }}>Conclaves</h3>
               <p className="text-gray-400 text-sm leading-relaxed">
                 Interactive legal awareness events bringing together experts, students, and the public.
               </p>
             </div>
 
-            <div className="text-center p-10 bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 transition-all duration-300 hover:shadow-[0_0_40px_rgba(212,175,55,0.2)] hover:scale-105 group">
+            <div className="text-center p-6 sm:p-5 sm:p-6 lg:p-8 lg:p-10 bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 transition-all duration-300 hover:shadow-[0_0_40px_rgba(212,175,55,0.2)] hover:scale-105 group">
               <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-[#D4AF37]/20 to-[#D4AF37]/5 rounded-2xl mb-6 group-hover:shadow-[0_0_30px_rgba(212,175,55,0.3)] transition-all duration-300 border border-[#D4AF37]/30">
                 <Users className="w-10 h-10 text-[#D4AF37] group-hover:scale-110 transition-transform" />
               </div>
-              <h3 className="mb-4 text-[#F5F5F5]" style={{ fontFamily: 'Playfair Display, serif', fontSize: '1.5rem' }}>Community</h3>
+              <h3 className="mb-4 text-[#F5F5F5] text-xl sm:text-2xl" style={{ fontFamily: 'Playfair Display, serif' }}>Community</h3>
               <p className="text-gray-400 text-sm leading-relaxed">
                 A growing community of legal enthusiasts, professionals, and individuals seeking legal awareness.
               </p>
@@ -318,81 +523,81 @@ export default function App() {
       </section>
 
       {/* PRACTICE AREAS / SERVICES */}
-      <section className="py-32 bg-gradient-to-br from-[#0F0F0F] to-[#0A0A0A] relative overflow-hidden z-10">
+      <section className="py-16 sm:py-24 lg:py-32 bg-gradient-to-br from-[#0F0F0F] to-[#0A0A0A] relative overflow-hidden z-10">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,_var(--tw-gradient-stops))] from-[#D4AF37]/5 via-transparent to-transparent" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="text-center mb-20">
+          <div className="text-center mb-12 sm:mb-10 sm:mb-12 lg:mb-16 lg:mb-20">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#D4AF37]/10 to-transparent rounded-full border border-[#D4AF37]/20 mb-6">
               <Briefcase className="w-4 h-4 text-[#D4AF37]" />
               <span className="text-[#D4AF37] text-sm">Expertise</span>
             </div>
-            <h2 className="mb-6 text-[#F5F5F5]" style={{ fontFamily: 'Playfair Display, serif', fontSize: '3.5rem', fontWeight: '600' }}>Practice Areas</h2>
+            <h2 className="mb-6 text-[#F5F5F5] text-3xl sm:text-4xl lg:text-5xl" style={{ fontFamily: 'Playfair Display, serif', fontWeight: '600' }}>Practice Areas</h2>
             <div className="flex items-center justify-center gap-3 mb-8">
               <div className="w-24 h-px bg-gradient-to-r from-transparent to-[#D4AF37]" />
               <div className="w-24 h-px bg-gradient-to-l from-transparent to-[#D4AF37]" />
             </div>
-            <p className="text-gray-400 max-w-2xl mx-auto text-lg leading-relaxed">
+            <p className="text-gray-400 max-w-2xl mx-auto text-base sm:text-lg leading-relaxed">
               Comprehensive legal services across multiple domains, delivered with expertise and integrity.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="p-10 bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 hover:shadow-[0_0_40px_rgba(212,175,55,0.2)] transition-all duration-300 hover:scale-105 group">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 sm:p-6 lg:p-8">
+            <div className="p-6 sm:p-5 sm:p-6 lg:p-8 lg:p-10 bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 hover:shadow-[0_0_40px_rgba(212,175,55,0.2)] transition-all duration-300 hover:scale-105 group">
               <div className="w-14 h-14 bg-gradient-to-br from-[#D4AF37]/20 to-[#D4AF37]/5 rounded-xl flex items-center justify-center mb-6 group-hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] transition-all border border-[#D4AF37]/30">
                 <Building2 className="w-7 h-7 text-[#D4AF37] group-hover:scale-110 transition-transform" />
               </div>
-              <h3 className="mb-4 text-[#F5F5F5]" style={{ fontFamily: 'Playfair Display, serif', fontSize: '1.5rem' }}>Corporate Law</h3>
+              <h3 className="mb-4 text-[#F5F5F5] text-xl sm:text-2xl" style={{ fontFamily: 'Playfair Display, serif' }}>Corporate Law</h3>
               <p className="text-gray-400 text-sm leading-relaxed">
                 Business formations, contracts, mergers & acquisitions, and corporate governance advisory.
               </p>
             </div>
 
-            <div className="p-10 bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 hover:shadow-[0_0_40px_rgba(212,175,55,0.2)] transition-all duration-300 hover:scale-105 group">
+            <div className="p-6 sm:p-5 sm:p-6 lg:p-8 lg:p-10 bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 hover:shadow-[0_0_40px_rgba(212,175,55,0.2)] transition-all duration-300 hover:scale-105 group">
               <div className="w-14 h-14 bg-gradient-to-br from-[#D4AF37]/20 to-[#D4AF37]/5 rounded-xl flex items-center justify-center mb-6 group-hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] transition-all border border-[#D4AF37]/30">
                 <Gavel className="w-7 h-7 text-[#D4AF37] group-hover:scale-110 transition-transform" />
               </div>
-              <h3 className="mb-4 text-[#F5F5F5]" style={{ fontFamily: 'Playfair Display, serif', fontSize: '1.5rem' }}>Criminal Law</h3>
+              <h3 className="mb-4 text-[#F5F5F5] text-xl sm:text-2xl" style={{ fontFamily: 'Playfair Display, serif' }}>Criminal Law</h3>
               <p className="text-gray-400 text-sm leading-relaxed">
                 Defense representation, bail applications, and comprehensive criminal litigation services.
               </p>
             </div>
 
-            <div className="p-10 bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 hover:shadow-[0_0_40px_rgba(212,175,55,0.2)] transition-all duration-300 hover:scale-105 group">
+            <div className="p-6 sm:p-5 sm:p-6 lg:p-8 lg:p-10 bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 hover:shadow-[0_0_40px_rgba(212,175,55,0.2)] transition-all duration-300 hover:scale-105 group">
               <div className="w-14 h-14 bg-gradient-to-br from-[#D4AF37]/20 to-[#D4AF37]/5 rounded-xl flex items-center justify-center mb-6 group-hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] transition-all border border-[#D4AF37]/30">
                 <FileText className="w-7 h-7 text-[#D4AF37] group-hover:scale-110 transition-transform" />
               </div>
-              <h3 className="mb-4 text-[#F5F5F5]" style={{ fontFamily: 'Playfair Display, serif', fontSize: '1.5rem' }}>Civil Disputes</h3>
+              <h3 className="mb-4 text-[#F5F5F5] text-xl sm:text-2xl" style={{ fontFamily: 'Playfair Display, serif' }}>Civil Disputes</h3>
               <p className="text-gray-400 text-sm leading-relaxed">
                 Property disputes, family law matters, and civil litigation across various courts.
               </p>
             </div>
 
-            <div className="p-10 bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 hover:shadow-[0_0_40px_rgba(212,175,55,0.2)] transition-all duration-300 hover:scale-105 group">
+            <div className="p-6 sm:p-5 sm:p-6 lg:p-8 lg:p-10 bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 hover:shadow-[0_0_40px_rgba(212,175,55,0.2)] transition-all duration-300 hover:scale-105 group">
               <div className="w-14 h-14 bg-gradient-to-br from-[#D4AF37]/20 to-[#D4AF37]/5 rounded-xl flex items-center justify-center mb-6 group-hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] transition-all border border-[#D4AF37]/30">
                 <UserCheck className="w-7 h-7 text-[#D4AF37] group-hover:scale-110 transition-transform" />
               </div>
-              <h3 className="mb-4 text-[#F5F5F5]" style={{ fontFamily: 'Playfair Display, serif', fontSize: '1.5rem' }}>Legal Consulting</h3>
+              <h3 className="mb-4 text-[#F5F5F5] text-xl sm:text-2xl" style={{ fontFamily: 'Playfair Display, serif' }}>Legal Consulting</h3>
               <p className="text-gray-400 text-sm leading-relaxed">
                 Strategic legal advice, risk assessment, and consultation for individuals and businesses.
               </p>
             </div>
 
-            <div className="p-10 bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 hover:shadow-[0_0_40px_rgba(212,175,55,0.2)] transition-all duration-300 hover:scale-105 group">
+            <div className="p-6 sm:p-5 sm:p-6 lg:p-8 lg:p-10 bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 hover:shadow-[0_0_40px_rgba(212,175,55,0.2)] transition-all duration-300 hover:scale-105 group">
               <div className="w-14 h-14 bg-gradient-to-br from-[#D4AF37]/20 to-[#D4AF37]/5 rounded-xl flex items-center justify-center mb-6 group-hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] transition-all border border-[#D4AF37]/30">
                 <ClipboardCheck className="w-7 h-7 text-[#D4AF37] group-hover:scale-110 transition-transform" />
               </div>
-              <h3 className="mb-4 text-[#F5F5F5]" style={{ fontFamily: 'Playfair Display, serif', fontSize: '1.5rem' }}>Compliance</h3>
+              <h3 className="mb-4 text-[#F5F5F5] text-xl sm:text-2xl" style={{ fontFamily: 'Playfair Display, serif' }}>Compliance</h3>
               <p className="text-gray-400 text-sm leading-relaxed">
                 Regulatory compliance, audits, and ensuring adherence to legal standards and frameworks.
               </p>
             </div>
 
-            <div className="p-10 bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 hover:shadow-[0_0_40px_rgba(212,175,55,0.2)] transition-all duration-300 hover:scale-105 group">
+            <div className="p-6 sm:p-5 sm:p-6 lg:p-8 lg:p-10 bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 hover:shadow-[0_0_40px_rgba(212,175,55,0.2)] transition-all duration-300 hover:scale-105 group">
               <div className="w-14 h-14 bg-gradient-to-br from-[#D4AF37]/20 to-[#D4AF37]/5 rounded-xl flex items-center justify-center mb-6 group-hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] transition-all border border-[#D4AF37]/30">
                 <Shield className="w-7 h-7 text-[#D4AF37] group-hover:scale-110 transition-transform" />
               </div>
-              <h3 className="mb-4 text-[#F5F5F5]" style={{ fontFamily: 'Playfair Display, serif', fontSize: '1.5rem' }}>Consumer Rights</h3>
+              <h3 className="mb-4 text-[#F5F5F5] text-xl sm:text-2xl" style={{ fontFamily: 'Playfair Display, serif' }}>Consumer Rights</h3>
               <p className="text-gray-400 text-sm leading-relaxed">
                 Protection of consumer rights, dispute resolution, and advocacy against unfair practices.
               </p>
@@ -402,25 +607,25 @@ export default function App() {
       </section>
 
       {/* BULLETIN BOARD */}
-      <section id="articles" className="py-32 bg-[#0A0A0A] relative overflow-hidden z-10">
+      <section id="articles" className="py-16 sm:py-24 lg:py-32 bg-[#0A0A0A] relative overflow-hidden z-10">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#D4AF37]/8 via-transparent to-transparent" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="text-center mb-20">
+          <div className="text-center mb-12 sm:mb-10 sm:mb-12 lg:mb-16 lg:mb-20">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#D4AF37]/10 to-transparent rounded-full border border-[#D4AF37]/20 mb-6">
               <Bell className="w-4 h-4 text-[#D4AF37]" />
               <span className="text-[#D4AF37] text-sm">Stay Updated</span>
             </div>
-            <h2 className="mb-6 text-[#F5F5F5]" style={{ fontFamily: 'Playfair Display, serif', fontSize: '3.5rem', fontWeight: '600' }}>Live Updates</h2>
+            <h2 className="mb-6 text-[#F5F5F5] text-3xl sm:text-4xl lg:text-5xl" style={{ fontFamily: 'Playfair Display, serif', fontWeight: '600' }}>Live Updates</h2>
             <div className="flex items-center justify-center gap-3 mb-8">
               <div className="w-24 h-px bg-gradient-to-r from-transparent to-[#D4AF37]" />
               <div className="w-24 h-px bg-gradient-to-l from-transparent to-[#D4AF37]" />
             </div>
-            <p className="text-gray-400 max-w-2xl mx-auto text-lg leading-relaxed">
+            <p className="text-gray-400 max-w-2xl mx-auto text-base sm:text-lg leading-relaxed">
               Latest articles, Instagram reels, and important announcements from the legal world.
             </p>
 
-            <div className="flex items-center justify-center gap-8 mt-12">
+            <div className="flex items-center justify-center gap-5 sm:p-6 lg:p-8 mt-12">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-[#D4AF37] rounded-full animate-pulse" />
                 <span className="text-gray-400 text-sm">Live Content Feed</span>
@@ -432,8 +637,8 @@ export default function App() {
             </div>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="group bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] p-8 rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 transition-all duration-300 hover:shadow-[0_0_40px_rgba(212,175,55,0.2)] hover:scale-105">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 sm:p-6 lg:p-8">
+            <div className="group bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] p-5 sm:p-6 lg:p-8 rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 transition-all duration-300 hover:shadow-[0_0_40px_rgba(212,175,55,0.2)] hover:scale-105">
               <div className="flex items-start gap-5">
                 <div className="w-20 h-20 bg-gradient-to-br from-[#D4AF37]/20 to-[#D4AF37]/5 rounded-xl flex items-center justify-center flex-shrink-0 border border-[#D4AF37]/30 group-hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] transition-all">
                   <BookOpen className="w-9 h-9 text-[#D4AF37]" />
@@ -446,7 +651,7 @@ export default function App() {
                       <span>12.5K</span>
                     </div>
                   </div>
-                  <h4 className="mb-3 text-[#F5F5F5] leading-snug" style={{ fontFamily: 'Playfair Display, serif', fontSize: '1.25rem' }}>Understanding Your Rights in Consumer Disputes</h4>
+                  <h4 className="mb-3 text-[#F5F5F5] leading-snug text-lg sm:text-xl" style={{ fontFamily: 'Playfair Display, serif' }}>Understanding Your Rights in Consumer Disputes</h4>
                   <p className="text-gray-400 text-sm mb-4 leading-relaxed">A comprehensive guide to consumer protection laws in India...</p>
                   <a href="#" className="text-[#D4AF37] text-sm hover:underline inline-flex items-center gap-1.5 group-hover:gap-2.5 transition-all">
                     Read More <ChevronRight className="w-4 h-4" />
@@ -455,7 +660,7 @@ export default function App() {
               </div>
             </div>
 
-            <div className="group bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] p-8 rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 transition-all duration-300 hover:shadow-[0_0_40px_rgba(212,175,55,0.2)] hover:scale-105">
+            <div className="group bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] p-5 sm:p-6 lg:p-8 rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 transition-all duration-300 hover:shadow-[0_0_40px_rgba(212,175,55,0.2)] hover:scale-105">
               <div className="flex items-start gap-5">
                 <div className="w-20 h-20 bg-gradient-to-br from-[#D4AF37]/20 to-[#D4AF37]/5 rounded-xl flex items-center justify-center flex-shrink-0 border border-[#D4AF37]/30 group-hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] transition-all">
                   <Video className="w-9 h-9 text-[#D4AF37]" />
@@ -468,7 +673,7 @@ export default function App() {
                       <span>28.3K</span>
                     </div>
                   </div>
-                  <h4 className="mb-3 text-[#F5F5F5] leading-snug" style={{ fontFamily: 'Playfair Display, serif', fontSize: '1.25rem' }}>New Reel: What is Section 498A?</h4>
+                  <h4 className="mb-3 text-[#F5F5F5] leading-snug text-lg sm:text-xl" style={{ fontFamily: 'Playfair Display, serif' }}>New Reel: What is Section 498A?</h4>
                   <p className="text-gray-400 text-sm mb-4 leading-relaxed">Quick explainer on domestic violence laws in 60 seconds...</p>
                   <a href="#" className="text-[#D4AF37] text-sm hover:underline inline-flex items-center gap-1.5 group-hover:gap-2.5 transition-all">
                     Watch Now <ChevronRight className="w-4 h-4" />
@@ -477,7 +682,7 @@ export default function App() {
               </div>
             </div>
 
-            <div className="group bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] p-8 rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 transition-all duration-300 hover:shadow-[0_0_40px_rgba(212,175,55,0.2)] hover:scale-105">
+            <div className="group bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] p-5 sm:p-6 lg:p-8 rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 transition-all duration-300 hover:shadow-[0_0_40px_rgba(212,175,55,0.2)] hover:scale-105">
               <div className="flex items-start gap-5">
                 <div className="w-20 h-20 bg-gradient-to-br from-[#D4AF37]/20 to-[#D4AF37]/5 rounded-xl flex items-center justify-center flex-shrink-0 border border-[#D4AF37]/30 group-hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] transition-all">
                   <Bell className="w-9 h-9 text-[#D4AF37]" />
@@ -489,7 +694,7 @@ export default function App() {
                       <span className="text-xs text-[#D4AF37]">Featured</span>
                     </div>
                   </div>
-                  <h4 className="mb-3 text-[#F5F5F5] leading-snug" style={{ fontFamily: 'Playfair Display, serif', fontSize: '1.25rem' }}>Announcement: Free Legal Aid Camp</h4>
+                  <h4 className="mb-3 text-[#F5F5F5] leading-snug text-lg sm:text-xl" style={{ fontFamily: 'Playfair Display, serif' }}>Announcement: Free Legal Aid Camp</h4>
                   <p className="text-gray-400 text-sm mb-4 leading-relaxed">Join us this weekend for a free legal consultation drive...</p>
                   <a href="#" className="text-[#D4AF37] text-sm hover:underline inline-flex items-center gap-1.5 group-hover:gap-2.5 transition-all">
                     Learn More <ChevronRight className="w-4 h-4" />
@@ -498,7 +703,7 @@ export default function App() {
               </div>
             </div>
 
-            <div className="group bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] p-8 rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 transition-all duration-300 hover:shadow-[0_0_40px_rgba(212,175,55,0.2)] hover:scale-105">
+            <div className="group bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] p-5 sm:p-6 lg:p-8 rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 transition-all duration-300 hover:shadow-[0_0_40px_rgba(212,175,55,0.2)] hover:scale-105">
               <div className="flex items-start gap-5">
                 <div className="w-20 h-20 bg-gradient-to-br from-[#D4AF37]/20 to-[#D4AF37]/5 rounded-xl flex items-center justify-center flex-shrink-0 border border-[#D4AF37]/30 group-hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] transition-all">
                   <FileText className="w-9 h-9 text-[#D4AF37]" />
@@ -511,7 +716,7 @@ export default function App() {
                       <span>9.2K</span>
                     </div>
                   </div>
-                  <h4 className="mb-3 text-[#F5F5F5] leading-snug" style={{ fontFamily: 'Playfair Display, serif', fontSize: '1.25rem' }}>Corporate Law Update: New Compliance Requirements</h4>
+                  <h4 className="mb-3 text-[#F5F5F5] leading-snug text-lg sm:text-xl" style={{ fontFamily: 'Playfair Display, serif' }}>Corporate Law Update: New Compliance Requirements</h4>
                   <p className="text-gray-400 text-sm mb-4 leading-relaxed">Latest changes in corporate compliance you need to know...</p>
                   <a href="#" className="text-[#D4AF37] text-sm hover:underline inline-flex items-center gap-1.5 group-hover:gap-2.5 transition-all">
                     Read More <ChevronRight className="w-4 h-4" />
@@ -520,7 +725,7 @@ export default function App() {
               </div>
             </div>
 
-            <div className="group bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] p-8 rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 transition-all duration-300 hover:shadow-[0_0_40px_rgba(212,175,55,0.2)] hover:scale-105">
+            <div className="group bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] p-5 sm:p-6 lg:p-8 rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 transition-all duration-300 hover:shadow-[0_0_40px_rgba(212,175,55,0.2)] hover:scale-105">
               <div className="flex items-start gap-5">
                 <div className="w-20 h-20 bg-gradient-to-br from-[#D4AF37]/20 to-[#D4AF37]/5 rounded-xl flex items-center justify-center flex-shrink-0 border border-[#D4AF37]/30 group-hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] transition-all">
                   <Instagram className="w-9 h-9 text-[#D4AF37]" />
@@ -533,7 +738,7 @@ export default function App() {
                       <span>45.7K</span>
                     </div>
                   </div>
-                  <h4 className="mb-3 text-[#F5F5F5] leading-snug" style={{ fontFamily: 'Playfair Display, serif', fontSize: '1.25rem' }}>Instagram Series: Know Your Rights</h4>
+                  <h4 className="mb-3 text-[#F5F5F5] leading-snug text-lg sm:text-xl" style={{ fontFamily: 'Playfair Display, serif' }}>Instagram Series: Know Your Rights</h4>
                   <p className="text-gray-400 text-sm mb-4 leading-relaxed">New 5-part series covering fundamental rights in India...</p>
                   <a href="#" className="text-[#D4AF37] text-sm hover:underline inline-flex items-center gap-1.5 group-hover:gap-2.5 transition-all">
                     View Series <ChevronRight className="w-4 h-4" />
@@ -542,7 +747,7 @@ export default function App() {
               </div>
             </div>
 
-            <div className="group bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] p-8 rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 transition-all duration-300 hover:shadow-[0_0_40px_rgba(212,175,55,0.2)] hover:scale-105">
+            <div className="group bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] p-5 sm:p-6 lg:p-8 rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 transition-all duration-300 hover:shadow-[0_0_40px_rgba(212,175,55,0.2)] hover:scale-105">
               <div className="flex items-start gap-5">
                 <div className="w-20 h-20 bg-gradient-to-br from-[#D4AF37]/20 to-[#D4AF37]/5 rounded-xl flex items-center justify-center flex-shrink-0 border border-[#D4AF37]/30 group-hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] transition-all">
                   <Award className="w-9 h-9 text-[#D4AF37]" />
@@ -555,7 +760,7 @@ export default function App() {
                       <span>18.1K</span>
                     </div>
                   </div>
-                  <h4 className="mb-3 text-[#F5F5F5] leading-snug" style={{ fontFamily: 'Playfair Display, serif', fontSize: '1.25rem' }}>LawyerPedia Wins Legal Awareness Award</h4>
+                  <h4 className="mb-3 text-[#F5F5F5] leading-snug text-lg sm:text-xl" style={{ fontFamily: 'Playfair Display, serif' }}>LawyerPedia Wins Legal Awareness Award</h4>
                   <p className="text-gray-400 text-sm mb-4 leading-relaxed">Recognized for outstanding contribution to legal education...</p>
                   <a href="#" className="text-[#D4AF37] text-sm hover:underline inline-flex items-center gap-1.5 group-hover:gap-2.5 transition-all">
                     Read More <ChevronRight className="w-4 h-4" />
@@ -574,26 +779,26 @@ export default function App() {
       </section>
 
       {/* CONCLAVES SECTION */}
-      <section id="conclaves" className="py-32 bg-gradient-to-br from-[#0F0F0F] to-[#0A0A0A] relative overflow-hidden z-10">
+      <section id="conclaves" className="py-16 sm:py-24 lg:py-32 bg-gradient-to-br from-[#0F0F0F] to-[#0A0A0A] relative overflow-hidden z-10">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_var(--tw-gradient-stops))] from-[#D4AF37]/5 via-transparent to-transparent" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="text-center mb-20">
+          <div className="text-center mb-12 sm:mb-10 sm:mb-12 lg:mb-16 lg:mb-20">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#D4AF37]/10 to-transparent rounded-full border border-[#D4AF37]/20 mb-6">
               <Calendar className="w-4 h-4 text-[#D4AF37]" />
               <span className="text-[#D4AF37] text-sm">Events & Gatherings</span>
             </div>
-            <h2 className="mb-6 text-[#F5F5F5]" style={{ fontFamily: 'Playfair Display, serif', fontSize: '3.5rem', fontWeight: '600' }}>Conclaves & Events</h2>
+            <h2 className="mb-6 text-[#F5F5F5] text-3xl sm:text-4xl lg:text-5xl" style={{ fontFamily: 'Playfair Display, serif', fontWeight: '600' }}>Conclaves & Events</h2>
             <div className="flex items-center justify-center gap-3 mb-8">
               <div className="w-24 h-px bg-gradient-to-r from-transparent to-[#D4AF37]" />
               <div className="w-24 h-px bg-gradient-to-l from-transparent to-[#D4AF37]" />
             </div>
-            <p className="text-gray-400 max-w-2xl mx-auto text-lg leading-relaxed">
+            <p className="text-gray-400 max-w-2xl mx-auto text-base sm:text-lg leading-relaxed">
               Join our transformative legal awareness conclaves and connect with experts, students, and legal enthusiasts.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 sm:p-6 lg:p-8">
             <div className="group bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] rounded-2xl overflow-hidden border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 hover:shadow-[0_0_50px_rgba(212,175,55,0.25)] transition-all duration-300 hover:scale-105">
               <div className="relative h-56 bg-gradient-to-br from-[#D4AF37] to-[#F4D03F] flex items-center justify-center overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
@@ -604,11 +809,11 @@ export default function App() {
                   </div>
                 </div>
               </div>
-              <div className="p-8">
+              <div className="p-5 sm:p-6 lg:p-8">
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-[#D4AF37]/20 to-[#D4AF37]/5 rounded-full border border-[#D4AF37]/30 text-[#D4AF37] text-sm mb-4">
                   <span>Featured Event</span>
                 </div>
-                <h3 className="mb-4 text-[#F5F5F5]" style={{ fontFamily: 'Playfair Display, serif', fontSize: '1.5rem' }}>Legal Awareness Conclave 2026</h3>
+                <h3 className="mb-4 text-[#F5F5F5] text-xl sm:text-2xl" style={{ fontFamily: 'Playfair Display, serif' }}>Legal Awareness Conclave 2026</h3>
                 <p className="text-gray-400 text-sm mb-6 leading-relaxed">
                   A comprehensive event covering consumer rights, criminal law basics, and legal remedies for common issues.
                 </p>
@@ -616,8 +821,11 @@ export default function App() {
                   <Calendar className="w-4 h-4 text-[#D4AF37]" />
                   <span>June 15, 2026</span>
                 </div>
-                <button className="w-full px-6 py-3.5 bg-gradient-to-r from-[#D4AF37] to-[#F4D03F] text-black rounded-lg hover:shadow-[0_0_30px_rgba(212,175,55,0.4)] transition-all duration-300 hover:scale-105">
-                  Register Now
+                <button
+                  onClick={() => setSelectedConclave(0)}
+                  className="w-full px-6 py-3.5 bg-gradient-to-r from-[#D4AF37] to-[#F4D03F] text-black rounded-lg hover:shadow-[0_0_30px_rgba(212,175,55,0.4)] transition-all duration-300 hover:scale-105"
+                >
+                  View Details
                 </button>
               </div>
             </div>
@@ -632,12 +840,12 @@ export default function App() {
                   </div>
                 </div>
               </div>
-              <div className="p-8">
+              <div className="p-5 sm:p-6 lg:p-8">
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#1A1A1A] rounded-full border border-[#D4AF37]/30 text-gray-400 text-sm mb-4">
                   <Award className="w-3 h-3" />
                   <span>500+ Attendees</span>
                 </div>
-                <h3 className="mb-4 text-[#F5F5F5]" style={{ fontFamily: 'Playfair Display, serif', fontSize: '1.5rem' }}>Corporate Law Summit 2025</h3>
+                <h3 className="mb-4 text-[#F5F5F5] text-xl sm:text-2xl" style={{ fontFamily: 'Playfair Display, serif' }}>Corporate Law Summit 2025</h3>
                 <p className="text-gray-400 text-sm mb-6 leading-relaxed">
                   Successfully conducted summit on startup legal compliance, attended by 500+ entrepreneurs and legal professionals.
                 </p>
@@ -645,7 +853,10 @@ export default function App() {
                   <Calendar className="w-4 h-4 text-[#D4AF37]" />
                   <span>November 12, 2025</span>
                 </div>
-                <button className="w-full px-6 py-3.5 bg-transparent text-[#D4AF37] border border-[#D4AF37] rounded-lg hover:bg-[#D4AF37]/10 transition-all duration-300">
+                <button
+                  onClick={() => setSelectedConclave(1)}
+                  className="w-full px-6 py-3.5 bg-transparent text-[#D4AF37] border border-[#D4AF37] rounded-lg hover:bg-[#D4AF37]/10 transition-all duration-300"
+                >
                   View Details
                 </button>
               </div>
@@ -661,12 +872,12 @@ export default function App() {
                   </div>
                 </div>
               </div>
-              <div className="p-8">
+              <div className="p-5 sm:p-6 lg:p-8">
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#1A1A1A] rounded-full border border-[#D4AF37]/30 text-gray-400 text-sm mb-4">
                   <Users className="w-3 h-3" />
                   <span>300+ Attendees</span>
                 </div>
-                <h3 className="mb-4 text-[#F5F5F5]" style={{ fontFamily: 'Playfair Display, serif', fontSize: '1.5rem' }}>Women's Legal Rights Workshop</h3>
+                <h3 className="mb-4 text-[#F5F5F5] text-xl sm:text-2xl" style={{ fontFamily: 'Playfair Display, serif' }}>Women's Legal Rights Workshop</h3>
                 <p className="text-gray-400 text-sm mb-6 leading-relaxed">
                   Empowering workshop focusing on women's legal rights, property laws, and domestic violence protection.
                 </p>
@@ -674,7 +885,10 @@ export default function App() {
                   <Calendar className="w-4 h-4 text-[#D4AF37]" />
                   <span>August 20, 2025</span>
                 </div>
-                <button className="w-full px-6 py-3.5 bg-transparent text-[#D4AF37] border border-[#D4AF37] rounded-lg hover:bg-[#D4AF37]/10 transition-all duration-300">
+                <button
+                  onClick={() => setSelectedConclave(2)}
+                  className="w-full px-6 py-3.5 bg-transparent text-[#D4AF37] border border-[#D4AF37] rounded-lg hover:bg-[#D4AF37]/10 transition-all duration-300"
+                >
                   View Details
                 </button>
               </div>
@@ -684,21 +898,21 @@ export default function App() {
       </section>
 
       {/* GALLERY SECTION */}
-      <section id="gallery" className="py-32 bg-[#0A0A0A] relative overflow-hidden z-10">
+      <section id="gallery" className="py-16 sm:py-24 lg:py-32 bg-[#0A0A0A] relative overflow-hidden z-10">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-[#D4AF37]/5 via-transparent to-transparent" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="text-center mb-20">
+          <div className="text-center mb-12 sm:mb-10 sm:mb-12 lg:mb-16 lg:mb-20">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#D4AF37]/10 to-transparent rounded-full border border-[#D4AF37]/20 mb-6">
               <Award className="w-4 h-4 text-[#D4AF37]" />
               <span className="text-[#D4AF37] text-sm">Moments & Memories</span>
             </div>
-            <h2 className="mb-6 text-[#F5F5F5]" style={{ fontFamily: 'Playfair Display, serif', fontSize: '3.5rem', fontWeight: '600' }}>Gallery</h2>
+            <h2 className="mb-6 text-[#F5F5F5] text-3xl sm:text-4xl lg:text-5xl" style={{ fontFamily: 'Playfair Display, serif', fontWeight: '600' }}>Gallery</h2>
             <div className="flex items-center justify-center gap-3 mb-8">
               <div className="w-24 h-px bg-gradient-to-r from-transparent to-[#D4AF37]" />
               <div className="w-24 h-px bg-gradient-to-l from-transparent to-[#D4AF37]" />
             </div>
-            <p className="text-gray-400 max-w-2xl mx-auto text-lg leading-relaxed">
+            <p className="text-gray-400 max-w-2xl mx-auto text-base sm:text-lg leading-relaxed">
               Moments from our conclaves, speaking engagements, and community events.
             </p>
           </div>
@@ -722,11 +936,11 @@ export default function App() {
       </section>
 
       {/* FOOTER */}
-      <footer id="contact" className="bg-gradient-to-br from-[#0F0F0F] to-[#0A0A0A] text-white py-20 relative overflow-hidden border-t border-[#D4AF37]/10 z-10">
+      <footer id="contact" className="bg-gradient-to-br from-[#0F0F0F] to-[#0A0A0A] text-white py-12 sm:py-16 lg:py-20 relative overflow-hidden border-t border-[#D4AF37]/10 z-10">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#D4AF37]/5 via-transparent to-transparent" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10 lg:gap-12 mb-10 sm:mb-12 lg:mb-16">
             <div>
               <div className="flex items-center gap-3 mb-6">
                 <div className="relative">
@@ -739,7 +953,7 @@ export default function App() {
                 Empowering individuals through legal awareness and expert guidance. Your trusted partner in understanding and accessing justice.
               </p>
               <div className="flex gap-4">
-                <a href="#" className="w-12 h-12 bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] border border-[#D4AF37]/20 rounded-xl flex items-center justify-center hover:border-[#D4AF37]/40 hover:shadow-[0_0_20px_rgba(212,175,55,0.2)] transition-all duration-300 hover:scale-110">
+                <a href="https://www.instagram.com/thelawyerpediaofficial/" target="_blank" rel="noopener noreferrer" className="w-12 h-12 bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] border border-[#D4AF37]/20 rounded-xl flex items-center justify-center hover:border-[#D4AF37]/40 hover:shadow-[0_0_20px_rgba(212,175,55,0.2)] transition-all duration-300 hover:scale-110">
                   <Instagram className="w-5 h-5 text-[#D4AF37]" />
                 </a>
                 <a href="#" className="w-12 h-12 bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] border border-[#D4AF37]/20 rounded-xl flex items-center justify-center hover:border-[#D4AF37]/40 hover:shadow-[0_0_20px_rgba(212,175,55,0.2)] transition-all duration-300 hover:scale-110">
@@ -752,7 +966,7 @@ export default function App() {
             </div>
 
             <div>
-              <h3 className="mb-6 text-[#F5F5F5]" style={{ fontFamily: 'Playfair Display, serif', fontSize: '1.25rem' }}>Quick Links</h3>
+              <h3 className="mb-6 text-[#F5F5F5] text-lg sm:text-xl" style={{ fontFamily: 'Playfair Display, serif' }}>Quick Links</h3>
               <ul className="space-y-3">
                 <li><a href="#home" className="text-gray-400 hover:text-[#D4AF37] transition-colors text-sm inline-flex items-center gap-2 group">
                   <ChevronRight className="w-3 h-3 opacity-0 group-hover:opacity-100 -ml-3 group-hover:ml-0 transition-all" />
@@ -778,7 +992,7 @@ export default function App() {
             </div>
 
             <div>
-              <h3 className="mb-6 text-[#F5F5F5]" style={{ fontFamily: 'Playfair Display, serif', fontSize: '1.25rem' }}>Practice Areas</h3>
+              <h3 className="mb-6 text-[#F5F5F5] text-lg sm:text-xl" style={{ fontFamily: 'Playfair Display, serif' }}>Practice Areas</h3>
               <ul className="space-y-3">
                 <li><a href="#" className="text-gray-400 hover:text-[#D4AF37] transition-colors text-sm inline-flex items-center gap-2 group">
                   <ChevronRight className="w-3 h-3 opacity-0 group-hover:opacity-100 -ml-3 group-hover:ml-0 transition-all" />
@@ -804,7 +1018,7 @@ export default function App() {
             </div>
 
             <div>
-              <h3 className="mb-6 text-[#F5F5F5]" style={{ fontFamily: 'Playfair Display, serif', fontSize: '1.25rem' }}>Contact Info</h3>
+              <h3 className="mb-6 text-[#F5F5F5] text-lg sm:text-xl" style={{ fontFamily: 'Playfair Display, serif' }}>Contact Info</h3>
               <ul className="space-y-5">
                 <li className="flex items-start gap-3 group">
                   <div className="w-10 h-10 bg-gradient-to-br from-[#D4AF37]/20 to-[#D4AF37]/5 rounded-lg flex items-center justify-center flex-shrink-0 border border-[#D4AF37]/30 group-hover:shadow-[0_0_15px_rgba(212,175,55,0.2)] transition-all">
@@ -836,7 +1050,7 @@ export default function App() {
               <p className="text-gray-500 text-sm">
                 © 2026 LawyerPedia. All rights reserved. | Owned by <span className="text-[#D4AF37]">Mehak Ahuja</span>
               </p>
-              <div className="flex gap-8 text-sm">
+              <div className="flex gap-5 sm:p-6 lg:p-8 text-sm">
                 <a href="#" className="text-gray-400 hover:text-[#D4AF37] transition-colors">Privacy Policy</a>
                 <a href="#" className="text-gray-400 hover:text-[#D4AF37] transition-colors">Terms of Service</a>
                 <a href="#" className="text-gray-400 hover:text-[#D4AF37] transition-colors">Disclaimer</a>
@@ -845,6 +1059,11 @@ export default function App() {
           </div>
         </div>
       </footer>
+
+      {/* CONSULTATION FORM MODAL */}
+      {showConsultationForm && (
+        <ConsultationForm onClose={() => setShowConsultationForm(false)} />
+      )}
     </div>
   );
 }
