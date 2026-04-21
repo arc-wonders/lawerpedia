@@ -96,21 +96,6 @@ export default function AdminDashboard({ onLogout, onBackToSite }: AdminDashboar
         {activeTab === 'consultations' && <ConsultationsManager />}
         {activeTab === 'gallery' && <GalleryManager />}
       </div>
-
-      {/* Supabase Notice */}
-      <div className="fixed bottom-6 right-6 max-w-sm">
-        <div className="bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] border border-[#D4AF37]/20 rounded-lg p-4 shadow-xl">
-          <div className="flex items-start gap-3">
-            <div className="w-2 h-2 bg-yellow-500 rounded-full mt-1.5 flex-shrink-0 animate-pulse" />
-            <div>
-              <p className="text-sm text-[#F5F5F5] mb-1">Demo Mode</p>
-              <p className="text-xs text-gray-400">
-                Connect Supabase from Make settings to enable real-time data persistence.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

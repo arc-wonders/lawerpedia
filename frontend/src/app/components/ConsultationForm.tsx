@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { X, Send, User, Mail, Phone, FileText } from 'lucide-react';
+import { apiJson } from '../api';
 
 interface ConsultationFormProps {
   onClose: () => void;
@@ -20,22 +21,17 @@ export default function ConsultationForm({ onClose }: ConsultationFormProps) {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Save to localStorage (temporary until Supabase is connected)
-    const consultations = JSON.parse(localStorage.getItem('lawyerpedia_consultations') || '[]');
-    const newConsultation = {
-      id: Date.now(),
-      ...formData,
-      status: 'pending',
-      createdAt: new Date().toISOString()
-    };
-    consultations.push(newConsultation);
-    localStorage.setItem('lawyerpedia_consultations', JSON.stringify(consultations));
-
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    setIsSubmitting(false);
-    setIsSuccess(true);
+    try {
+      await apiJson('/api/consultations', {
+        method: 'POST',
+        body: JSON.stringify(formData)
+      });
+      setIsSuccess(true);
+    } catch (err: any) {
+      alert(err?.message || 'Failed to submit. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
 
     // Auto close after 2 seconds
     setTimeout(() => {
@@ -173,7 +169,7 @@ export default function ConsultationForm({ onClose }: ConsultationFormProps) {
 
             <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4 text-sm text-gray-400">
               <p>
-                <strong className="text-blue-400">Note:</strong> This form currently stores data locally. Connect Supabase from Make settings to enable secure backend storage and email notifications.
+                <strong className="text-blue-400">Note:</strong> Your request is saved securely to the backend. If submission fails, check that the API server is running.
               </p>
             </div>
 

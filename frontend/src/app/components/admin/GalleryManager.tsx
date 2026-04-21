@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Image as ImageIcon, Plus, Trash2, Upload } from 'lucide-react';
+import { apiFetch, apiJson } from '../../api';
 
 interface GalleryImage {
-  id: number;
+  id: string;
   title: string;
   url: string;
   createdAt: string;
@@ -10,40 +11,74 @@ interface GalleryImage {
 
 export default function GalleryManager() {
   const [images, setImages] = useState<GalleryImage[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [uploadTitle, setUploadTitle] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
-    // Load from localStorage (temporary until Supabase is connected)
-    const stored = localStorage.getItem('lawyerpedia_gallery');
-    if (stored) {
-      setImages(JSON.parse(stored));
-    }
+    const load = async () => {
+      setIsLoading(true);
+      try {
+        const res = await apiJson<{ items: GalleryImage[] }>('/api/admin/gallery', { admin: true });
+        setImages(res.items);
+      } catch (err: any) {
+        alert(err?.message || 'Failed to load gallery');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    load();
   }, []);
 
-  const saveImages = (updated: GalleryImage[]) => {
-    setImages(updated);
-    localStorage.setItem('lawyerpedia_gallery', JSON.stringify(updated));
-  };
-
-  const handleAdd = () => {
+  const handleAdd = async () => {
     const title = prompt('Enter image title:');
     if (!title) return;
 
     const url = prompt('Enter image URL:');
     if (!url) return;
 
-    const newImage: GalleryImage = {
-      id: Date.now(),
-      title,
-      url,
-      createdAt: new Date().toISOString()
-    };
-
-    saveImages([...images, newImage]);
+    try {
+      const res = await apiJson<{ item: GalleryImage }>('/api/admin/gallery', {
+        method: 'POST',
+        body: JSON.stringify({ title, url }),
+        admin: true
+      });
+      setImages(prev => [res.item, ...prev]);
+    } catch (err: any) {
+      alert(err?.message || 'Failed to add image');
+    }
   };
 
-  const handleDelete = (id: number) => {
+  const handleUpload = async (file: File) => {
+    setIsUploading(true);
+    try {
+      const form = new FormData();
+      form.append('file', file);
+      form.append('title', uploadTitle);
+
+      const res = await apiFetch('/api/admin/gallery/upload', {
+        method: 'POST',
+        body: form,
+        admin: true
+      });
+      const payload = (await res.json()) as { item: GalleryImage };
+      setImages(prev => [payload.item, ...prev]);
+      setUploadTitle('');
+    } catch (err: any) {
+      alert(err?.message || 'Failed to upload image');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to delete this image?')) {
-      saveImages(images.filter(img => img.id !== id));
+      try {
+        await apiJson(`/api/admin/gallery/${id}`, { method: 'DELETE', admin: true });
+        setImages(prev => prev.filter(img => img.id !== id));
+      } catch (err: any) {
+        alert(err?.message || 'Failed to delete image');
+      }
     }
   };
 
@@ -68,16 +103,50 @@ export default function GalleryManager() {
         <div className="flex items-start gap-3">
           <Upload className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
           <div className="text-sm">
-            <p className="text-blue-400 mb-1">Image Upload Feature</p>
-            <p className="text-gray-400">
-              Connect Supabase to enable direct image uploads with automatic storage. Currently using external image URLs.
-            </p>
+            <p className="text-blue-400 mb-1">Image Upload</p>
+            <p className="text-gray-400">Upload images directly (stored in MongoDB).</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Upload */}
+      <div className="bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] rounded-xl border border-[#D4AF37]/20 p-6">
+        <div className="grid sm:grid-cols-3 gap-4 items-end">
+          <div className="sm:col-span-2">
+            <label className="block text-sm text-gray-400 mb-2">Title (optional)</label>
+            <input
+              value={uploadTitle}
+              onChange={(e) => setUploadTitle(e.target.value)}
+              className="w-full px-4 py-3 bg-[#0A0A0A] border border-[#D4AF37]/20 rounded-lg text-[#F5F5F5] focus:outline-none focus:border-[#D4AF37]"
+              placeholder="Gallery image title"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-gray-400 mb-2">File</label>
+            <input
+              type="file"
+              accept="image/*"
+              disabled={isUploading}
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) handleUpload(f);
+                e.target.value = '';
+              }}
+              className="w-full text-gray-300 text-sm"
+            />
+            {isUploading && <div className="text-xs text-gray-500 mt-2">Uploading...</div>}
           </div>
         </div>
       </div>
 
       {/* Gallery Grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {isLoading && (
+          <div className="col-span-full text-center py-12 text-gray-400">
+            <ImageIcon className="w-16 h-16 mx-auto mb-4 opacity-20" />
+            <p>Loading gallery...</p>
+          </div>
+        )}
         {images.map((image) => (
           <div
             key={image.id}

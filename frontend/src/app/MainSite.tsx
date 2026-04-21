@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react';
 import { X, Menu, Scale, Briefcase, FileText, Users, Calendar, Instagram, Linkedin, Twitter, Mail, Phone, MapPin, Award, BookOpen, Video, Bell, ChevronRight, Gavel, Shield, Building2, UserCheck, ClipboardCheck, TrendingUp, Eye } from 'lucide-react';
 import mehakImage from '../imports/ms.jpg';
 import ConsultationForm from './components/ConsultationForm';
+import { apiJson } from './api';
+import ConclaveRegistrationForm, { ConclaveForm } from './components/ConclaveRegistrationForm';
 
 interface Conclave {
-  id: number;
+  id: string;
   title: string;
   date: string;
   status: string;
@@ -14,6 +16,15 @@ interface Conclave {
   highlights: string[];
   venue: string;
   time: string;
+  imageUrls?: string[];
+  thumbnailUrl?: string | null;
+}
+
+interface GalleryImage {
+  id: string;
+  title: string;
+  url: string;
+  createdAt: string;
 }
 
 export default function MainSite() {
@@ -22,82 +33,73 @@ export default function MainSite() {
   const [selectedConclave, setSelectedConclave] = useState<number | null>(null);
   const [showConsultationForm, setShowConsultationForm] = useState(false);
   const [conclaves, setConclaves] = useState<Conclave[]>([]);
+  const [gallery, setGallery] = useState<GalleryImage[]>([]);
+
+  const [showConclaveRegistration, setShowConclaveRegistration] = useState(false);
+  const [registrationForm, setRegistrationForm] = useState<ConclaveForm | null>(null);
+  const [registrationConclaveIndex, setRegistrationConclaveIndex] = useState<number | null>(null);
+
+  const [hoveredConclaveId, setHoveredConclaveId] = useState<string | null>(null);
+  const [hoverSlideIndex, setHoverSlideIndex] = useState(0);
+  const [detailsImageIndex, setDetailsImageIndex] = useState(0);
 
   useEffect(() => {
     setShowModal(true);
   }, []);
 
   useEffect(() => {
-    // Load conclaves from localStorage
-    const stored = localStorage.getItem('lawyerpedia_conclaves');
-    if (stored) {
-      setConclaves(JSON.parse(stored));
-    } else {
-      // Set default conclaves if none exist
-      const defaultConclaves: Conclave[] = [
-    {
-      id: 1,
-      title: "Legal Awareness Conclave 2026",
-      date: "June 15, 2026",
-      status: "upcoming",
-      attendees: "Expected 600+",
-      description: "A comprehensive event covering consumer rights, criminal law basics, and legal remedies for common issues.",
-      fullDescription: "Join us for India's premier legal awareness conclave, designed to empower individuals with knowledge of their legal rights and remedies. This comprehensive event will feature expert speakers, interactive workshops, and networking opportunities with legal professionals from across the country.",
-      highlights: [
-        "Expert panel discussions on consumer protection laws",
-        "Interactive workshops on criminal law basics",
-        "Legal aid clinic with free consultations",
-        "Networking opportunities with legal professionals",
-        "Certificate of participation"
-      ],
-      venue: "India Habitat Centre, New Delhi",
-      time: "9:00 AM - 6:00 PM"
-    },
-    {
-      id: 2,
-      title: "Corporate Law Summit 2025",
-      date: "November 12, 2025",
-      status: "past",
-      attendees: "500+",
-      description: "Successfully conducted summit on startup legal compliance, attended by 500+ entrepreneurs and legal professionals.",
-      fullDescription: "Our Corporate Law Summit brought together leading entrepreneurs, legal experts, and policymakers to discuss the evolving landscape of startup legal compliance in India. The event featured keynote speeches, panel discussions, and hands-on workshops.",
-      highlights: [
-        "Keynote by prominent startup lawyers",
-        "Panel on recent regulatory changes",
-        "Workshops on incorporation and compliance",
-        "Investor-founder legal relationship sessions",
-        "Networking with 500+ attendees"
-      ],
-      venue: "The Leela Ambience, Gurugram",
-      time: "Full Day Event"
-    },
-    {
-      id: 3,
-      title: "Women's Legal Rights Workshop",
-      date: "August 20, 2025",
-      status: "past",
-      attendees: "300+",
-      description: "Empowering workshop focusing on women's legal rights, property laws, and domestic violence protection.",
-      fullDescription: "An empowering day dedicated to educating women about their legal rights in India. This workshop covered crucial topics including property rights, matrimonial laws, workplace harassment, and domestic violence protection mechanisms.",
-      highlights: [
-        "Sessions on property and inheritance rights",
-        "Understanding domestic violence laws",
-        "Workplace harassment prevention",
-        "Legal aid resources and support systems",
-        "One-on-one legal counseling"
-      ],
-      venue: "India International Centre, New Delhi",
-      time: "10:00 AM - 5:00 PM"
+    setHoverSlideIndex(0);
+    if (!hoveredConclaveId) return;
+    const timer = setInterval(() => setHoverSlideIndex((i) => i + 1), 1200);
+    return () => clearInterval(timer);
+  }, [hoveredConclaveId]);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await apiJson<{ items: Conclave[] }>('/api/conclaves');
+        setConclaves(res.items);
+      } catch {
+        setConclaves([]);
+      }
+    };
+    load();
+  }, []);
+
+  const openRegistration = async (index: number) => {
+    const conclave = conclaves[index];
+    if (!conclave?.id) return;
+
+    try {
+      const res = await apiJson<{ form: ConclaveForm | null }>(`/api/conclaves/${conclave.id}/form`);
+      if (!res.form || res.form.enabled === false) {
+        alert('Registration is not available for this conclave.');
+        return;
+      }
+      setRegistrationForm(res.form);
+      setRegistrationConclaveIndex(index);
+      setShowConclaveRegistration(true);
+    } catch (err: any) {
+      alert(err?.message || 'Failed to load registration form');
     }
-      ];
-      setConclaves(defaultConclaves);
-      localStorage.setItem('lawyerpedia_conclaves', JSON.stringify(defaultConclaves));
-    }
+  };
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await apiJson<{ items: GalleryImage[] }>('/api/gallery');
+        setGallery(res.items);
+      } catch {
+        setGallery([]);
+      }
+    };
+    load();
   }, []);
 
   useEffect(() => {
     if (selectedConclave !== null) {
       document.body.style.overflow = 'hidden';
+      setDetailsImageIndex(0);
     } else {
       document.body.style.overflow = 'unset';
     }
@@ -107,9 +109,9 @@ export default function MainSite() {
   }, [selectedConclave]);
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] relative" style={{ fontFamily: 'Inter, sans-serif' }}>
+      <div className="min-h-screen bg-[#0A0A0A] relative" style={{ fontFamily: 'Inter, sans-serif' }}>
       {/* CONCLAVE DETAILS OVERLAY */}
-      {selectedConclave !== null && (
+      {selectedConclave !== null && conclaves[selectedConclave] && (
         <div className="fixed inset-0 z-50 bg-[#0A0A0A] overflow-y-auto">
           <div className="min-h-screen">
             {/* Header with Back Button */}
@@ -157,9 +159,42 @@ export default function MainSite() {
 
                 {/* Image Banner */}
                 <div className="relative aspect-video bg-gradient-to-br from-[#1A1A1A] to-[#0A0A0A] rounded-2xl overflow-hidden border border-[#D4AF37]/20">
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <Calendar className="w-32 h-32 text-[#D4AF37]/20" />
-                  </div>
+                  {(() => {
+                    const imgs = conclaves[selectedConclave].imageUrls || [];
+                    const current = imgs.length > 0 ? imgs[detailsImageIndex % imgs.length] : null;
+                    return current ? (
+                      <img src={current} alt="Conclave" className="absolute inset-0 w-full h-full object-cover" />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Calendar className="w-32 h-32 text-[#D4AF37]/20" />
+                      </div>
+                    );
+                  })()}
+
+                  {((conclaves[selectedConclave].imageUrls || []).length > 1) && (
+                    <>
+                      <button
+                        onClick={() => {
+                          const len = (conclaves[selectedConclave].imageUrls || []).length;
+                          setDetailsImageIndex((i) => (i - 1 + len) % len);
+                        }}
+                        className="absolute left-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-black/40 border border-white/20 text-white hover:bg-black/60 transition-all flex items-center justify-center"
+                        title="Previous image"
+                      >
+                        <ChevronRight className="w-5 h-5 rotate-180" />
+                      </button>
+                      <button
+                        onClick={() => {
+                          const len = (conclaves[selectedConclave].imageUrls || []).length;
+                          setDetailsImageIndex((i) => (i + 1) % len);
+                        }}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-black/40 border border-white/20 text-white hover:bg-black/60 transition-all flex items-center justify-center"
+                        title="Next image"
+                      >
+                        <ChevronRight className="w-5 h-5" />
+                      </button>
+                    </>
+                  )}
                 </div>
 
                 {/* Description */}
@@ -204,7 +239,10 @@ export default function MainSite() {
                 {/* CTA */}
                 {conclaves[selectedConclave].status === 'upcoming' && (
                   <div className="text-center">
-                    <button className="px-10 py-4 bg-gradient-to-r from-[#D4AF37] to-[#F4D03F] text-black rounded-lg hover:shadow-[0_0_40px_rgba(212,175,55,0.4)] transition-all duration-300 hover:scale-105">
+                    <button
+                      onClick={() => openRegistration(selectedConclave)}
+                      className="px-10 py-4 bg-gradient-to-r from-[#D4AF37] to-[#F4D03F] text-black rounded-lg hover:shadow-[0_0_40px_rgba(212,175,55,0.4)] transition-all duration-300 hover:scale-105"
+                    >
                       Register for This Event
                     </button>
                   </div>
@@ -236,7 +274,13 @@ export default function MainSite() {
                 Join India's premier legal awareness conclave. Connect with legal experts, attend workshops, and empower yourself with knowledge of your rights and remedies.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <button className="px-8 py-3.5 bg-gradient-to-r from-[#D4AF37] to-[#F4D03F] text-black rounded-lg hover:shadow-[0_0_30px_rgba(212,175,55,0.4)] transition-all duration-300 hover:scale-105">
+                <button
+                  onClick={() => {
+                    if (conclaves.length > 0) openRegistration(0);
+                    else alert('No conclaves available yet.');
+                  }}
+                  className="px-8 py-3.5 bg-gradient-to-r from-[#D4AF37] to-[#F4D03F] text-black rounded-lg hover:shadow-[0_0_30px_rgba(212,175,55,0.4)] transition-all duration-300 hover:scale-105"
+                >
                   Register Now
                 </button>
                 <button
@@ -799,100 +843,90 @@ export default function MainSite() {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 sm:p-6 lg:p-8">
-            <div className="group bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] rounded-2xl overflow-hidden border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 hover:shadow-[0_0_50px_rgba(212,175,55,0.25)] transition-all duration-300 hover:scale-105">
-              <div className="relative h-56 bg-gradient-to-br from-[#D4AF37] to-[#F4D03F] flex items-center justify-center overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                <Calendar className="w-24 h-24 text-white/90 relative z-10" />
-                <div className="absolute top-4 right-4 z-20">
-                  <div className="px-3 py-1.5 bg-white/20 backdrop-blur-md rounded-lg border border-white/30">
-                    <span className="text-white text-sm">Upcoming</span>
-                  </div>
-                </div>
+            {conclaves.length === 0 && (
+              <div className="col-span-full text-center py-12 text-gray-400">
+                <Calendar className="w-16 h-16 mx-auto mb-4 opacity-20" />
+                <p>No conclaves available yet.</p>
               </div>
-              <div className="p-5 sm:p-6 lg:p-8">
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-[#D4AF37]/20 to-[#D4AF37]/5 rounded-full border border-[#D4AF37]/30 text-[#D4AF37] text-sm mb-4">
-                  <span>Featured Event</span>
-                </div>
-                <h3 className="mb-4 text-[#F5F5F5] text-xl sm:text-2xl" style={{ fontFamily: 'Playfair Display, serif' }}>Legal Awareness Conclave 2026</h3>
-                <p className="text-gray-400 text-sm mb-6 leading-relaxed">
-                  A comprehensive event covering consumer rights, criminal law basics, and legal remedies for common issues.
-                </p>
-                <div className="flex items-center gap-2 text-sm text-gray-500 mb-6">
-                  <Calendar className="w-4 h-4 text-[#D4AF37]" />
-                  <span>June 15, 2026</span>
-                </div>
-                <button
-                  onClick={() => setSelectedConclave(0)}
-                  className="w-full px-6 py-3.5 bg-gradient-to-r from-[#D4AF37] to-[#F4D03F] text-black rounded-lg hover:shadow-[0_0_30px_rgba(212,175,55,0.4)] transition-all duration-300 hover:scale-105"
-                >
-                  View Details
-                </button>
-              </div>
-            </div>
+            )}
 
-            <div className="group bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] rounded-2xl overflow-hidden border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 hover:shadow-[0_0_50px_rgba(212,175,55,0.25)] transition-all duration-300 hover:scale-105">
-              <div className="relative h-56 bg-gradient-to-br from-[#1A1A1A] to-[#0A0A0A] flex items-center justify-center overflow-hidden border-b border-[#D4AF37]/20">
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                <Users className="w-24 h-24 text-[#D4AF37] relative z-10" />
-                <div className="absolute top-4 right-4 z-20">
-                  <div className="px-3 py-1.5 bg-[#1A1A1A]/80 backdrop-blur-md rounded-lg border border-[#D4AF37]/30">
-                    <span className="text-gray-400 text-sm">Past Event</span>
-                  </div>
-                </div>
-              </div>
-              <div className="p-5 sm:p-6 lg:p-8">
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#1A1A1A] rounded-full border border-[#D4AF37]/30 text-gray-400 text-sm mb-4">
-                  <Award className="w-3 h-3" />
-                  <span>500+ Attendees</span>
-                </div>
-                <h3 className="mb-4 text-[#F5F5F5] text-xl sm:text-2xl" style={{ fontFamily: 'Playfair Display, serif' }}>Corporate Law Summit 2025</h3>
-                <p className="text-gray-400 text-sm mb-6 leading-relaxed">
-                  Successfully conducted summit on startup legal compliance, attended by 500+ entrepreneurs and legal professionals.
-                </p>
-                <div className="flex items-center gap-2 text-sm text-gray-500 mb-6">
-                  <Calendar className="w-4 h-4 text-[#D4AF37]" />
-                  <span>November 12, 2025</span>
-                </div>
-                <button
-                  onClick={() => setSelectedConclave(1)}
-                  className="w-full px-6 py-3.5 bg-transparent text-[#D4AF37] border border-[#D4AF37] rounded-lg hover:bg-[#D4AF37]/10 transition-all duration-300"
+            {conclaves.map((conclave, index) => {
+              const isUpcoming = conclave.status === 'upcoming';
+              const imgs = conclave.imageUrls || [];
+              const isHovered = hoveredConclaveId === conclave.id;
+              const slideUrl = imgs.length > 0 ? imgs[hoverSlideIndex % imgs.length] : null;
+              const coverUrl = isHovered ? slideUrl : (conclave.thumbnailUrl || imgs[0] || null);
+              return (
+                <div
+                  key={conclave.id}
+                  onMouseEnter={() => setHoveredConclaveId(conclave.id)}
+                  onMouseLeave={() => setHoveredConclaveId((prev) => (prev === conclave.id ? null : prev))}
+                  className="group bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] rounded-2xl overflow-hidden border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 hover:shadow-[0_0_50px_rgba(212,175,55,0.25)] transition-all duration-300 hover:scale-105"
                 >
-                  View Details
-                </button>
-              </div>
-            </div>
+                  <div
+                    className={`relative h-56 flex items-center justify-center overflow-hidden ${
+                      isUpcoming
+                        ? 'bg-gradient-to-br from-[#D4AF37] to-[#F4D03F]'
+                        : 'bg-gradient-to-br from-[#1A1A1A] to-[#0A0A0A] border-b border-[#D4AF37]/20'
+                    }`}
+                  >
+                    {coverUrl ? (
+                      <img src={coverUrl} alt={conclave.title} className="absolute inset-0 w-full h-full object-cover" />
+                    ) : (
+                      <Calendar className={`w-24 h-24 relative z-10 ${isUpcoming ? 'text-white/90' : 'text-[#D4AF37]'}`} />
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent pointer-events-none" />
+                    <div className="absolute top-4 right-4 z-20">
+                      <div
+                        className={`px-3 py-1.5 backdrop-blur-md rounded-lg border ${
+                          isUpcoming
+                            ? 'bg-white/20 border-white/30'
+                          : 'bg-[#1A1A1A]/80 border-[#D4AF37]/30'
+                        }`}
+                      >
+                        <span className={`text-sm ${isUpcoming ? 'text-white' : 'text-gray-400'}`}>
+                          {isUpcoming ? 'Upcoming' : 'Past Event'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
 
-            <div className="group bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] rounded-2xl overflow-hidden border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 hover:shadow-[0_0_50px_rgba(212,175,55,0.25)] transition-all duration-300 hover:scale-105">
-              <div className="relative h-56 bg-gradient-to-br from-[#1A1A1A] to-[#0A0A0A] flex items-center justify-center overflow-hidden border-b border-[#D4AF37]/20">
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                <Scale className="w-24 h-24 text-[#D4AF37] relative z-10" />
-                <div className="absolute top-4 right-4 z-20">
-                  <div className="px-3 py-1.5 bg-[#1A1A1A]/80 backdrop-blur-md rounded-lg border border-[#D4AF37]/30">
-                    <span className="text-gray-400 text-sm">Past Event</span>
+                  <div className="p-5 sm:p-6 lg:p-8">
+                    <div
+                      className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-sm mb-4 ${
+                        isUpcoming
+                          ? 'bg-gradient-to-r from-[#D4AF37]/20 to-[#D4AF37]/5 border-[#D4AF37]/30 text-[#D4AF37]'
+                          : 'bg-[#1A1A1A] border-[#D4AF37]/30 text-gray-400'
+                      }`}
+                    >
+                      {isUpcoming ? <Award className="w-3 h-3" /> : <Users className="w-3 h-3" />}
+                      <span>{isUpcoming ? (index === 0 ? 'Featured Event' : 'Upcoming Event') : conclave.attendees}</span>
+                    </div>
+
+                    <h3 className="mb-4 text-[#F5F5F5] text-xl sm:text-2xl" style={{ fontFamily: 'Playfair Display, serif' }}>
+                      {conclave.title}
+                    </h3>
+                    <p className="text-gray-400 text-sm mb-6 leading-relaxed">{conclave.description}</p>
+
+                    <div className="flex items-center gap-2 text-sm text-gray-500 mb-6">
+                      <Calendar className="w-4 h-4 text-[#D4AF37]" />
+                      <span>{conclave.date}</span>
+                    </div>
+
+                    <button
+                      onClick={() => setSelectedConclave(index)}
+                      className={`w-full px-6 py-3.5 rounded-lg transition-all duration-300 ${
+                        isUpcoming
+                          ? 'bg-gradient-to-r from-[#D4AF37] to-[#F4D03F] text-black hover:shadow-[0_0_30px_rgba(212,175,55,0.4)] hover:scale-105'
+                          : 'bg-transparent text-[#D4AF37] border border-[#D4AF37] hover:bg-[#D4AF37]/10'
+                      }`}
+                    >
+                      View Details
+                    </button>
                   </div>
                 </div>
-              </div>
-              <div className="p-5 sm:p-6 lg:p-8">
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#1A1A1A] rounded-full border border-[#D4AF37]/30 text-gray-400 text-sm mb-4">
-                  <Users className="w-3 h-3" />
-                  <span>300+ Attendees</span>
-                </div>
-                <h3 className="mb-4 text-[#F5F5F5] text-xl sm:text-2xl" style={{ fontFamily: 'Playfair Display, serif' }}>Women's Legal Rights Workshop</h3>
-                <p className="text-gray-400 text-sm mb-6 leading-relaxed">
-                  Empowering workshop focusing on women's legal rights, property laws, and domestic violence protection.
-                </p>
-                <div className="flex items-center gap-2 text-sm text-gray-500 mb-6">
-                  <Calendar className="w-4 h-4 text-[#D4AF37]" />
-                  <span>August 20, 2025</span>
-                </div>
-                <button
-                  onClick={() => setSelectedConclave(2)}
-                  className="w-full px-6 py-3.5 bg-transparent text-[#D4AF37] border border-[#D4AF37] rounded-lg hover:bg-[#D4AF37]/10 transition-all duration-300"
-                >
-                  View Details
-                </button>
-              </div>
-            </div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -918,16 +952,30 @@ export default function MainSite() {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {[1, 2, 3, 4, 5, 6, 7, 8].map((item) => (
-              <div key={item} className="group aspect-square bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] rounded-2xl overflow-hidden cursor-pointer border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 hover:shadow-[0_0_40px_rgba(212,175,55,0.25)] transition-all duration-300 hover:scale-105">
-                <div className="h-full flex items-center justify-center relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-[#D4AF37]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <div className="text-center relative z-10">
-                    <div className="w-16 h-16 bg-gradient-to-br from-[#D4AF37]/20 to-[#D4AF37]/5 rounded-xl mx-auto mb-3 flex items-center justify-center border border-[#D4AF37]/30 group-hover:scale-110 transition-transform">
-                      <Scale className="w-8 h-8 text-[#D4AF37]" />
-                    </div>
-                    <p className="text-xs text-gray-500">Event Photo {item}</p>
-                  </div>
+            {gallery.length === 0 && (
+              <div className="col-span-full text-center py-12 text-gray-400">
+                <Scale className="w-16 h-16 mx-auto mb-4 opacity-20" />
+                <p>No gallery images yet.</p>
+              </div>
+            )}
+
+            {gallery.map((image) => (
+              <div
+                key={image.id}
+                className="group aspect-square bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] rounded-2xl overflow-hidden cursor-pointer border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 hover:shadow-[0_0_40px_rgba(212,175,55,0.25)] transition-all duration-300 hover:scale-105 relative"
+                title={image.title}
+              >
+                <img
+                  src={image.url}
+                  alt={image.title}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = 'https://via.placeholder.com/400?text=Image+Not+Found';
+                  }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
+                  <p className="text-white text-sm line-clamp-2">{image.title}</p>
                 </div>
               </div>
             ))}
@@ -1063,6 +1111,20 @@ export default function MainSite() {
       {/* CONSULTATION FORM MODAL */}
       {showConsultationForm && (
         <ConsultationForm onClose={() => setShowConsultationForm(false)} />
+      )}
+
+      {/* CONCLAVE REGISTRATION FORM */}
+      {showConclaveRegistration && registrationForm && registrationConclaveIndex !== null && conclaves[registrationConclaveIndex] && (
+        <ConclaveRegistrationForm
+          conclaveId={conclaves[registrationConclaveIndex].id}
+          conclaveTitle={conclaves[registrationConclaveIndex].title}
+          form={registrationForm}
+          onClose={() => {
+            setShowConclaveRegistration(false);
+            setRegistrationForm(null);
+            setRegistrationConclaveIndex(null);
+          }}
+        />
       )}
     </div>
   );

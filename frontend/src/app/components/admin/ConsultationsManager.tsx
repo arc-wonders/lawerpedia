@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { MessageSquare, Trash2, CheckCircle, Clock, Mail, Phone, User } from 'lucide-react';
+import { apiJson } from '../../api';
 
 interface Consultation {
-  id: number;
+  id: string;
   name: string;
   email: string;
   phone: string;
@@ -15,32 +16,48 @@ interface Consultation {
 export default function ConsultationsManager() {
   const [consultations, setConsultations] = useState<Consultation[]>([]);
   const [filter, setFilter] = useState<'all' | 'pending' | 'completed'>('all');
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    // Load from localStorage (temporary until Supabase is connected)
-    const stored = localStorage.getItem('lawyerpedia_consultations');
-    if (stored) {
-      setConsultations(JSON.parse(stored));
-    }
+    const load = async () => {
+      setIsLoading(true);
+      try {
+        const res = await apiJson<{ items: Consultation[] }>('/api/admin/consultations', { admin: true });
+        setConsultations(res.items);
+      } catch (err: any) {
+        alert(err?.message || 'Failed to load consultations');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    load();
   }, []);
 
-  const saveConsultations = (updated: Consultation[]) => {
-    setConsultations(updated);
-    localStorage.setItem('lawyerpedia_consultations', JSON.stringify(updated));
+  const toggleStatus = async (id: string) => {
+    const current = consultations.find(c => c.id === id);
+    if (!current) return;
+
+    const nextStatus = current.status === 'pending' ? 'completed' : 'pending';
+    try {
+      const res = await apiJson<{ item: Consultation }>(`/api/admin/consultations/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status: nextStatus }),
+        admin: true
+      });
+      setConsultations(prev => prev.map(c => (c.id === id ? res.item : c)));
+    } catch (err: any) {
+      alert(err?.message || 'Failed to update status');
+    }
   };
 
-  const toggleStatus = (id: number) => {
-    const updated = consultations.map(c =>
-      c.id === id
-        ? { ...c, status: c.status === 'pending' ? 'completed' as const : 'pending' as const }
-        : c
-    );
-    saveConsultations(updated);
-  };
-
-  const handleDelete = (id: number) => {
+  const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to delete this consultation request?')) {
-      saveConsultations(consultations.filter(c => c.id !== id));
+      try {
+        await apiJson(`/api/admin/consultations/${id}`, { method: 'DELETE', admin: true });
+        setConsultations(prev => prev.filter(c => c.id !== id));
+      } catch (err: any) {
+        alert(err?.message || 'Failed to delete consultation');
+      }
     }
   };
 
@@ -131,6 +148,12 @@ export default function ConsultationsManager() {
 
       {/* Consultations List */}
       <div className="grid gap-4">
+        {isLoading && (
+          <div className="text-center py-12 text-gray-400">
+            <User className="w-16 h-16 mx-auto mb-4 opacity-20" />
+            <p>Loading consultations...</p>
+          </div>
+        )}
         {filteredConsultations.map((consultation) => (
           <div
             key={consultation.id}

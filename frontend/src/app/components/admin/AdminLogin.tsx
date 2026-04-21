@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Scale, Lock, User } from 'lucide-react';
+import { apiJson, setAdminToken } from '../../api';
 
 interface AdminLoginProps {
   onLogin: () => void;
@@ -9,15 +10,24 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (username === 'admin' && password === 'admin123') {
+    setIsSubmitting(true);
+    setError('');
+    try {
+      const res = await apiJson<{ token: string; username: string }>('/api/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ username, password })
+      });
+      setAdminToken(res.token);
       onLogin();
-    } else {
-      setError('Invalid credentials');
-      setTimeout(() => setError(''), 3000);
+    } catch (err: any) {
+      setError(err?.message || 'Invalid credentials');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -76,9 +86,10 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
 
             <button
               type="submit"
-              className="w-full px-6 py-3 bg-gradient-to-r from-[#D4AF37] to-[#F4D03F] text-black rounded-lg hover:shadow-[0_0_30px_rgba(212,175,55,0.4)] transition-all duration-300 hover:scale-105"
+              disabled={isSubmitting}
+              className="w-full px-6 py-3 bg-gradient-to-r from-[#D4AF37] to-[#F4D03F] text-black rounded-lg hover:shadow-[0_0_30px_rgba(212,175,55,0.4)] transition-all duration-300 hover:scale-105 disabled:opacity-60 disabled:hover:scale-100"
             >
-              Login
+              {isSubmitting ? 'Logging in...' : 'Login'}
             </button>
           </form>
         </div>
