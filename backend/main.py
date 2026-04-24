@@ -36,7 +36,7 @@ JWT_EXPIRES_DAYS = 7
 CORS_ORIGIN = os.getenv("CORS_ORIGIN", "").strip()
 
 if not MONGODB_URL:
-    raise RuntimeError("Missing MONGODB_URL in backend/.env")
+    raise RuntimeError("Missing MONGODB_URL (set it as an environment variable)")
 
 if not os.getenv("JWT_SECRET"):
     # Keep running (dev-friendly) but log clearly.
@@ -262,7 +262,7 @@ def cors_origins() -> List[str]:
 app = FastAPI(title="LawyerPedia API")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=cors_origins(),
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
