@@ -167,6 +167,33 @@ export default function MainSite() {
     showConclavePopup && popupConclaveIndex !== null ? conclaves[popupConclaveIndex] : null;
   const popupThumb = popupConclave?.thumbnailUrl || popupConclave?.imageUrls?.[0] || null;
 
+  const scrollToSection = (id: string, opts?: { fallbackPath?: string }) => {
+    const el = document.getElementById(id);
+    if (!el) {
+      if (opts?.fallbackPath) navigate(opts.fallbackPath);
+      else window.location.hash = `#${id}`;
+      return;
+    }
+
+    setMobileMenuOpen(false);
+
+    const prefersReducedMotion = (() => {
+      try {
+        return window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false;
+      } catch {
+        return false;
+      }
+    })();
+
+    el.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'start' });
+
+    try {
+      window.history.replaceState(null, '', `#${id}`);
+    } catch {
+      // ignore
+    }
+  };
+
   return (
       <div className="min-h-screen bg-background text-foreground relative" style={{ fontFamily: 'Inter, sans-serif' }}>
       {/* CONCLAVE DETAILS OVERLAY */}
@@ -486,11 +513,17 @@ export default function MainSite() {
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                <button className="px-8 py-4 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 hover:shadow-[0_0_40px_rgba(122,86,46,0.25)] transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 group">
+                <button
+                  onClick={() => scrollToSection('articles', { fallbackPath: '/articles' })}
+                  className="px-8 py-4 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 hover:shadow-[0_0_40px_rgba(122,86,46,0.25)] transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 group droplet-btn"
+                >
                   <span>Explore Articles</span>
                   <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </button>
-                <button className="px-8 py-4 bg-transparent text-primary border border-primary rounded-lg hover:bg-primary/10 transition-all duration-300">
+                <button
+                  onClick={() => scrollToSection('conclaves')}
+                  className="px-8 py-4 bg-transparent text-primary border border-primary rounded-lg hover:bg-primary/10 transition-all duration-300 droplet-btn"
+                >
                   Join Conclave
                 </button>
               </div>

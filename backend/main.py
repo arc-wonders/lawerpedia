@@ -2,6 +2,10 @@ import os
 import secrets
 import csv
 import io
+import asyncio
+import random
+import urllib.request
+import urllib.error
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Literal, Optional
 
@@ -46,6 +50,8 @@ if not os.getenv("JWT_SECRET"):
 
 
 bearer = HTTPBearer(auto_error=False)
+
+_self_ping_task: Optional[asyncio.Task] = None
 
 
 def now_iso() -> str:
@@ -273,6 +279,45 @@ _mongo_client: Optional[AsyncIOMotorClient] = None
 _db: Optional[AsyncIOMotorDatabase] = None
 
 
+def _truthy(value: str) -> bool:
+    return value.strip().lower() in ("1", "true", "yes", "y", "on")
+
+
+async def _self_ping_loop() -> None:
+    enabled = _truthy(os.getenv("ENABLE_SELF_PING", "false"))
+    if not enabled:
+        return
+
+    base = (
+        os.getenv("SELF_PING_URL", "").strip()
+        or os.getenv("RENDER_EXTERNAL_URL", "").strip()
+        or os.getenv("PUBLIC_BASE_URL", "").strip()
+    )
+    if not base:
+        print("SELF_PING: ENABLED but no SELF_PING_URL/RENDER_EXTERNAL_URL/PUBLIC_BASE_URL set; skipping.")
+        return
+
+    url = base.rstrip("/") + "/health"
+    interval_s = int(os.getenv("SELF_PING_INTERVAL_SECONDS", "600"))
+    interval_s = max(60, interval_s)
+
+    # Small jitter so multiple instances don't sync up.
+    await asyncio.sleep(random.randint(5, 20))
+
+    while True:
+        try:
+            def _do_req():
+                req = urllib.request.Request(url, method="GET")
+                with urllib.request.urlopen(req, timeout=8) as resp:  # nosec - intentional keepalive ping
+                    _ = resp.read(128)
+
+            await asyncio.to_thread(_do_req)
+        except Exception as e:
+            print(f"SELF_PING: failed to ping {url}: {e}")
+
+        await asyncio.sleep(interval_s)
+
+
 async def get_db() -> AsyncIOMotorDatabase:
     if _db is None:
         raise RuntimeError("DB not initialized")
@@ -467,10 +512,17 @@ async def _startup() -> None:
     await ensure_admin_user(_db)
     await ensure_default_forms(_db)
 
+    global _self_ping_task
+    if _self_ping_task is None:
+        _self_ping_task = asyncio.create_task(_self_ping_loop())
+
 
 @app.on_event("shutdown")
 async def _shutdown() -> None:
-    global _mongo_client, _db
+    global _mongo_client, _db, _self_ping_task
+    if _self_ping_task is not None:
+        _self_ping_task.cancel()
+        _self_ping_task = None
     if _mongo_client is not None:
         _mongo_client.close()
     _mongo_client = None
