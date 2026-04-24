@@ -140,7 +140,7 @@ export default function ConclaveRegistrationForm({ conclaveId, conclaveTitle, fo
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="flex-1 px-8 py-4 bg-gradient-to-r from-[#D4AF37] to-[#F4D03F] text-black rounded-lg hover:shadow-[0_0_30px_rgba(212,175,55,0.4)] transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2"
+                className="flex-1 px-8 py-4 bg-gradient-to-r from-[#D4AF37] to-[#F4D03F] text-black rounded-lg hover:shadow-[0_0_30px_rgba(122,86,46,0.3)] transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2"
               >
                 {isSubmitting ? (
                   <>
@@ -168,4 +168,3 @@ export default function ConclaveRegistrationForm({ conclaveId, conclaveTitle, fo
     </div>
   );
 }
-

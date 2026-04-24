@@ -87,7 +87,7 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full px-6 py-3 bg-gradient-to-r from-[#D4AF37] to-[#F4D03F] text-black rounded-lg hover:shadow-[0_0_30px_rgba(212,175,55,0.4)] transition-all duration-300 hover:scale-105 disabled:opacity-60 disabled:hover:scale-100"
+              className="w-full px-6 py-3 bg-gradient-to-r from-[#D4AF37] to-[#F4D03F] text-black rounded-lg hover:shadow-[0_0_30px_rgba(122,86,46,0.3)] transition-all duration-300 hover:scale-105 disabled:opacity-60 disabled:hover:scale-100"
             >
               {isSubmitting ? 'Logging in...' : 'Login'}
             </button>

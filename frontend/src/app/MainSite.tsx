@@ -28,7 +28,8 @@ interface GalleryImage {
 }
 
 export default function MainSite() {
-  const [showModal, setShowModal] = useState(false);
+  const [showConclavePopup, setShowConclavePopup] = useState(false);
+  const [popupConclaveIndex, setPopupConclaveIndex] = useState<number | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [selectedConclave, setSelectedConclave] = useState<number | null>(null);
   const [showConsultationForm, setShowConsultationForm] = useState(false);
@@ -44,8 +45,23 @@ export default function MainSite() {
   const [detailsImageIndex, setDetailsImageIndex] = useState(0);
 
   useEffect(() => {
-    setShowModal(true);
-  }, []);
+    if (!showConclavePopup) return;
+    const t = setTimeout(() => setShowConclavePopup(false), 10_000);
+    return () => clearTimeout(t);
+  }, [showConclavePopup]);
+
+  const getLastConclavePopupIndex = async (items: Conclave[]) => {
+    const c = items[0];
+    if (!c?.id) return null;
+    if (c.status !== 'upcoming') return null;
+    try {
+      const res = await apiJson<{ form: ConclaveForm | null }>(`/api/conclaves/${c.id}/form`);
+      if (res.form && res.form.enabled !== false) return 0;
+    } catch {
+      // ignore
+    }
+    return null;
+  };
 
   useEffect(() => {
     setHoverSlideIndex(0);
@@ -58,9 +74,21 @@ export default function MainSite() {
     const load = async () => {
       try {
         const res = await apiJson<{ items: Conclave[] }>('/api/conclaves');
-        setConclaves(res.items);
+        const items = res.items || [];
+        setConclaves(items);
+
+        const idx = await getLastConclavePopupIndex(items);
+        if (idx !== null) {
+          setPopupConclaveIndex(idx);
+          setShowConclavePopup(true);
+        } else {
+          setPopupConclaveIndex(null);
+          setShowConclavePopup(false);
+        }
       } catch {
         setConclaves([]);
+        setPopupConclaveIndex(null);
+        setShowConclavePopup(false);
       }
     };
     load();
@@ -108,18 +136,22 @@ export default function MainSite() {
     };
   }, [selectedConclave]);
 
+  const popupConclave =
+    showConclavePopup && popupConclaveIndex !== null ? conclaves[popupConclaveIndex] : null;
+  const popupThumb = popupConclave?.thumbnailUrl || popupConclave?.imageUrls?.[0] || null;
+
   return (
-      <div className="min-h-screen bg-[#0A0A0A] relative" style={{ fontFamily: 'Inter, sans-serif' }}>
+      <div className="min-h-screen bg-background text-foreground relative" style={{ fontFamily: 'Inter, sans-serif' }}>
       {/* CONCLAVE DETAILS OVERLAY */}
       {selectedConclave !== null && conclaves[selectedConclave] && (
-        <div className="fixed inset-0 z-50 bg-[#0A0A0A] overflow-y-auto">
+        <div className="fixed inset-0 z-50 bg-background overflow-y-auto">
           <div className="min-h-screen">
             {/* Header with Back Button */}
-            <div className="sticky top-0 z-10 bg-[#0A0A0A]/95 backdrop-blur-xl border-b border-[#D4AF37]/10">
+            <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-xl border-b border-border">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                 <button
                   onClick={() => setSelectedConclave(null)}
-                  className="inline-flex items-center gap-2 text-gray-400 hover:text-[#D4AF37] transition-colors group"
+                  className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors group"
                 >
                   <ChevronRight className="w-5 h-5 rotate-180 group-hover:-translate-x-1 transition-transform" />
                   <span>Back to Conclaves</span>
@@ -132,33 +164,33 @@ export default function MainSite() {
               <div className="space-y-12">
                 {/* Hero Section */}
                 <div className="text-center space-y-6">
-                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#D4AF37]/10 to-transparent rounded-full border border-[#D4AF37]/20">
-                    <Calendar className="w-4 h-4 text-[#D4AF37]" />
-                    <span className="text-[#D4AF37] text-sm">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full border border-primary/20">
+                    <Calendar className="w-4 h-4 text-primary" />
+                    <span className="text-primary text-sm">
                       {conclaves[selectedConclave].status === 'upcoming' ? 'Upcoming Event' : 'Past Event'}
                     </span>
                   </div>
-                  <h1 className="text-4xl sm:text-5xl lg:text-6xl text-[#F5F5F5] leading-tight" style={{ fontFamily: 'Playfair Display, serif', fontWeight: '600' }}>
+                  <h1 className="text-4xl sm:text-5xl lg:text-6xl text-foreground leading-tight" style={{ fontFamily: 'Playfair Display, serif', fontWeight: '600' }}>
                     {conclaves[selectedConclave].title}
                   </h1>
-                  <div className="flex items-center justify-center gap-8 flex-wrap text-gray-400">
+                  <div className="flex items-center justify-center gap-8 flex-wrap text-muted-foreground">
                     <div className="flex items-center gap-2">
-                      <Calendar className="w-5 h-5 text-[#D4AF37]" />
+                      <Calendar className="w-5 h-5 text-primary" />
                       <span>{conclaves[selectedConclave].date}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Users className="w-5 h-5 text-[#D4AF37]" />
+                      <Users className="w-5 h-5 text-primary" />
                       <span>{conclaves[selectedConclave].attendees} Attendees</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <MapPin className="w-5 h-5 text-[#D4AF37]" />
+                      <MapPin className="w-5 h-5 text-primary" />
                       <span>{conclaves[selectedConclave].venue}</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Image Banner */}
-                <div className="relative aspect-video bg-gradient-to-br from-[#1A1A1A] to-[#0A0A0A] rounded-2xl overflow-hidden border border-[#D4AF37]/20">
+                <div className="relative aspect-video bg-card rounded-2xl overflow-hidden border border-border">
                   {(() => {
                     const imgs = conclaves[selectedConclave].imageUrls || [];
                     const current = imgs.length > 0 ? imgs[detailsImageIndex % imgs.length] : null;
@@ -166,7 +198,7 @@ export default function MainSite() {
                       <img src={current} alt="Conclave" className="absolute inset-0 w-full h-full object-cover" />
                     ) : (
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <Calendar className="w-32 h-32 text-[#D4AF37]/20" />
+                        <Calendar className="w-32 h-32 text-primary/20" />
                       </div>
                     );
                   })()}
@@ -198,32 +230,32 @@ export default function MainSite() {
                 </div>
 
                 {/* Description */}
-                <div className="bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] rounded-2xl border border-[#D4AF37]/20 p-8 sm:p-10 lg:p-12">
-                  <h2 className="text-2xl sm:text-3xl text-[#F5F5F5] mb-6" style={{ fontFamily: 'Playfair Display, serif', fontWeight: '600' }}>
+                <div className="bg-card rounded-2xl border border-border p-8 sm:p-10 lg:p-12">
+                  <h2 className="text-2xl sm:text-3xl text-foreground mb-6" style={{ fontFamily: 'Playfair Display, serif', fontWeight: '600' }}>
                     About This Event
                   </h2>
-                  <p className="text-gray-400 text-base sm:text-lg leading-relaxed mb-8">
+                  <p className="text-muted-foreground text-base sm:text-lg leading-relaxed mb-8">
                     {conclaves[selectedConclave].fullDescription}
                   </p>
 
                   <div className="grid sm:grid-cols-2 gap-6 mb-8">
-                    <div className="flex items-center gap-3 p-4 bg-[#0A0A0A]/50 rounded-lg border border-[#D4AF37]/10">
-                      <MapPin className="w-6 h-6 text-[#D4AF37] flex-shrink-0" />
+                    <div className="flex items-center gap-3 p-4 bg-muted rounded-lg border border-border">
+                      <MapPin className="w-6 h-6 text-primary flex-shrink-0" />
                       <div>
                         <div className="text-xs text-gray-500 mb-1">Venue</div>
-                        <div className="text-[#F5F5F5]">{conclaves[selectedConclave].venue}</div>
+                        <div className="text-foreground">{conclaves[selectedConclave].venue}</div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3 p-4 bg-[#0A0A0A]/50 rounded-lg border border-[#D4AF37]/10">
-                      <Award className="w-6 h-6 text-[#D4AF37] flex-shrink-0" />
+                    <div className="flex items-center gap-3 p-4 bg-muted rounded-lg border border-border">
+                      <Award className="w-6 h-6 text-primary flex-shrink-0" />
                       <div>
                         <div className="text-xs text-gray-500 mb-1">Time</div>
-                        <div className="text-[#F5F5F5]">{conclaves[selectedConclave].time}</div>
+                        <div className="text-foreground">{conclaves[selectedConclave].time}</div>
                       </div>
                     </div>
                   </div>
 
-                  <h3 className="text-xl text-[#F5F5F5] mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>
+                  <h3 className="text-xl text-foreground mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>
                     Event Highlights
                   </h3>
                   <ul className="space-y-3">
@@ -253,42 +285,79 @@ export default function MainSite() {
         </div>
       )}
 
-      {/* GLOBAL POP-UP MODAL */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 relative">
-          <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setShowModal(false)} />
-          <div className="relative bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] rounded-2xl shadow-2xl max-w-lg w-full p-6 sm:p-5 sm:p-6 lg:p-8 lg:p-10 border border-[#D4AF37]/20">
-            <div className="absolute -top-px left-1/2 -translate-x-1/2 w-32 h-px bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent" />
-            <button
-              onClick={() => setShowModal(false)}
-              className="absolute top-6 right-6 text-gray-500 hover:text-[#D4AF37] transition-colors"
-            >
-              <X size={24} />
-            </button>
-            <div className="text-center">
-              <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-[#D4AF37]/20 to-[#D4AF37]/5 rounded-full mb-6 border border-[#D4AF37]/30">
-                <Calendar className="w-10 h-10 text-[#D4AF37]" />
-              </div>
-              <h2 className="mb-4 text-[#F5F5F5] text-2xl sm:text-3xl" style={{ fontFamily: 'Playfair Display, serif' }}>Upcoming Legal Conclave 2026</h2>
-              <p className="text-gray-400 mb-8 leading-relaxed text-[15px]">
-                Join India's premier legal awareness conclave. Connect with legal experts, attend workshops, and empower yourself with knowledge of your rights and remedies.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <button
-                  onClick={() => {
-                    if (conclaves.length > 0) openRegistration(0);
-                    else alert('No conclaves available yet.');
-                  }}
-                  className="px-8 py-3.5 bg-gradient-to-r from-[#D4AF37] to-[#F4D03F] text-black rounded-lg hover:shadow-[0_0_30px_rgba(212,175,55,0.4)] transition-all duration-300 hover:scale-105"
-                >
-                  Register Now
-                </button>
-                <button
-                  onClick={() => setShowModal(false)}
-                  className="px-8 py-3.5 bg-transparent text-[#D4AF37] border border-[#D4AF37] rounded-lg hover:bg-[#D4AF37]/10 transition-all duration-300"
-                >
-                  Close
-                </button>
+      {/* CONCLAVE REGISTRATION POPUP (latest active) */}
+      {popupConclave && popupConclaveIndex !== null && (
+        <div className="fixed inset-0 z-[60]">
+          <div className="absolute inset-0 bg-background/50 backdrop-blur-md" />
+
+          <div className="relative min-h-full flex items-end sm:items-center justify-center p-4">
+            <div className="w-full max-w-xl rounded-2xl border border-border bg-card shadow-2xl overflow-hidden">
+              <div className="flex items-start gap-4 p-4 sm:p-6">
+                <div className="h-20 w-20 sm:h-24 sm:w-24 flex-shrink-0 rounded-xl overflow-hidden border border-border bg-muted">
+                  {popupThumb ? (
+                    <img src={popupThumb} alt={popupConclave.title} className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="h-full w-full flex items-center justify-center">
+                      <Calendar className="w-8 h-8 text-primary/60" />
+                    </div>
+                  )}
+                </div>
+
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="text-xs text-muted-foreground">Open for registration</div>
+                      <h3 className="text-lg sm:text-xl text-foreground mt-1 truncate" style={{ fontFamily: 'Playfair Display, serif', fontWeight: '600' }}>
+                        {popupConclave.title}
+                      </h3>
+                    </div>
+                    <button
+                      onClick={() => setShowConclavePopup(false)}
+                      className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                      aria-label="Close"
+                    >
+                      <X size={18} />
+                    </button>
+                  </div>
+
+                  <div className="mt-2 flex flex-wrap gap-x-4 gap-y-2 text-sm text-muted-foreground">
+                    <div className="inline-flex items-center gap-2">
+                      <Calendar className="w-4 h-4 text-primary/70" />
+                      <span className="truncate">{popupConclave.date}</span>
+                    </div>
+                    <div className="inline-flex items-center gap-2">
+                      <MapPin className="w-4 h-4 text-primary/70" />
+                      <span className="truncate">{popupConclave.venue}</span>
+                    </div>
+                  </div>
+
+                  {popupConclave.description && (
+                    <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
+                      {popupConclave.description}
+                    </p>
+                  )}
+
+                  <div className="mt-4 flex flex-col sm:flex-row gap-3">
+                    <button
+                      onClick={() => {
+                        setShowConclavePopup(false);
+                        openRegistration(popupConclaveIndex);
+                      }}
+                      className="px-5 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-all"
+                    >
+                      Register
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowConclavePopup(false);
+                        setSelectedConclave(popupConclaveIndex);
+                      }}
+                      className="px-5 py-3 bg-transparent text-primary border border-primary rounded-lg hover:bg-primary/10 transition-all"
+                    >
+                      View details
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -296,34 +365,34 @@ export default function MainSite() {
       )}
 
       {/* NAVBAR */}
-      <nav className="sticky top-0 z-40 bg-[#0A0A0A]/80 backdrop-blur-xl border-b border-[#D4AF37]/10 relative">
+      <nav className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-border relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-24">
             <div className="flex items-center gap-3">
               <div className="relative">
-                <Scale className="w-9 h-9 text-[#D4AF37]" />
-                <div className="absolute -inset-2 bg-[#D4AF37]/10 rounded-full blur-md -z-10" />
+                <Scale className="w-9 h-9 text-primary" />
+                <div className="absolute -inset-2 bg-primary/10 rounded-full blur-md -z-10" />
               </div>
-              <span className="text-2xl text-[#F5F5F5] tracking-tight" style={{ fontFamily: 'Playfair Display, serif' }}>LawyerPedia</span>
+              <span className="text-2xl text-foreground tracking-tight" style={{ fontFamily: 'Playfair Display, serif' }}>LawyerPedia</span>
             </div>
 
             <div className="hidden md:flex items-center gap-6 sm:p-5 sm:p-6 lg:p-8 lg:p-10">
-              <a href="#home" className="text-gray-400 hover:text-[#D4AF37] transition-colors text-[15px]">Home</a>
-              <a href="#about" className="text-gray-400 hover:text-[#D4AF37] transition-colors text-[15px]">About</a>
-              <a href="#articles" className="text-gray-400 hover:text-[#D4AF37] transition-colors text-[15px]">Articles</a>
-              <a href="#conclaves" className="text-gray-400 hover:text-[#D4AF37] transition-colors text-[15px]">Conclaves</a>
-              <a href="#gallery" className="text-gray-400 hover:text-[#D4AF37] transition-colors text-[15px]">Gallery</a>
-              <a href="#contact" className="text-gray-400 hover:text-[#D4AF37] transition-colors text-[15px]">Contact</a>
+              <a href="#home" className="text-muted-foreground hover:text-primary transition-colors text-[15px]">Home</a>
+              <a href="#about" className="text-muted-foreground hover:text-primary transition-colors text-[15px]">About</a>
+              <a href="#articles" className="text-muted-foreground hover:text-primary transition-colors text-[15px]">Articles</a>
+              <a href="#conclaves" className="text-muted-foreground hover:text-primary transition-colors text-[15px]">Conclaves</a>
+              <a href="#gallery" className="text-muted-foreground hover:text-primary transition-colors text-[15px]">Gallery</a>
+              <a href="#contact" className="text-muted-foreground hover:text-primary transition-colors text-[15px]">Contact</a>
               <button
                 onClick={() => setShowConsultationForm(true)}
-                className="px-7 py-3 bg-gradient-to-r from-[#D4AF37] to-[#F4D03F] text-black rounded-lg hover:shadow-[0_0_30px_rgba(212,175,55,0.3)] transition-all duration-300 hover:scale-105"
+                className="px-7 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 hover:shadow-[0_0_30px_rgba(122,86,46,0.25)] transition-all duration-300 hover:scale-105"
               >
                 Book Consultation
               </button>
             </div>
 
             <button
-              className="md:hidden text-[#F5F5F5]"
+              className="md:hidden text-foreground"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
               <Menu size={24} />
@@ -333,17 +402,17 @@ export default function MainSite() {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-[#D4AF37]/10 bg-[#0F0F0F]">
+          <div className="md:hidden border-t border-border bg-background">
             <div className="px-4 py-6 space-y-4">
-              <a href="#home" className="block text-gray-400 hover:text-[#D4AF37] py-2 text-[15px]">Home</a>
-              <a href="#about" className="block text-gray-400 hover:text-[#D4AF37] py-2 text-[15px]">About</a>
-              <a href="#articles" className="block text-gray-400 hover:text-[#D4AF37] py-2 text-[15px]">Articles</a>
-              <a href="#conclaves" className="block text-gray-400 hover:text-[#D4AF37] py-2 text-[15px]">Conclaves</a>
-              <a href="#gallery" className="block text-gray-400 hover:text-[#D4AF37] py-2 text-[15px]">Gallery</a>
-              <a href="#contact" className="block text-gray-400 hover:text-[#D4AF37] py-2 text-[15px]">Contact</a>
+              <a href="#home" className="block text-muted-foreground hover:text-primary py-2 text-[15px]">Home</a>
+              <a href="#about" className="block text-muted-foreground hover:text-primary py-2 text-[15px]">About</a>
+              <a href="#articles" className="block text-muted-foreground hover:text-primary py-2 text-[15px]">Articles</a>
+              <a href="#conclaves" className="block text-muted-foreground hover:text-primary py-2 text-[15px]">Conclaves</a>
+              <a href="#gallery" className="block text-muted-foreground hover:text-primary py-2 text-[15px]">Gallery</a>
+              <a href="#contact" className="block text-muted-foreground hover:text-primary py-2 text-[15px]">Contact</a>
               <button
                 onClick={() => { setShowConsultationForm(true); setMobileMenuOpen(false); }}
-                className="w-full px-7 py-3 bg-gradient-to-r from-[#D4AF37] to-[#F4D03F] text-black rounded-lg hover:shadow-[0_0_30px_rgba(212,175,55,0.3)] transition-all"
+                className="w-full px-7 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 hover:shadow-[0_0_30px_rgba(122,86,46,0.25)] transition-all"
               >
                 Book Consultation
               </button>
@@ -353,49 +422,48 @@ export default function MainSite() {
       </nav>
 
       {/* HERO SECTION */}
-      <section id="home" className="relative bg-gradient-to-br from-[#0A0A0A] via-[#0F0F0F] to-[#0A0A0A] py-16 sm:py-24 lg:py-40 overflow-hidden z-10">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-[#D4AF37]/5 via-transparent to-transparent" />
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgyMTIsMTc1LDU1LDAuMDMpIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-30" />
+      <section id="home" className="relative bg-background py-16 sm:py-24 lg:py-40 overflow-hidden z-10">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="grid lg:grid-cols-2 gap-5 sm:p-6 lg:p-8 sm:gap-12 lg:gap-16 items-center">
             <div className="space-y-8">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#D4AF37]/10 to-transparent rounded-full border border-[#D4AF37]/20">
-                <span className="text-[#D4AF37] text-sm">Premium Legal Services</span>
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full border border-primary/20">
+                <span className="text-primary text-sm">Premium Legal Services</span>
               </div>
 
-              <h1 className="text-[#F5F5F5] leading-[1.1] text-4xl sm:text-5xl lg:text-[4.5rem]" style={{ fontFamily: 'Playfair Display, serif', fontWeight: '600', letterSpacing: '-0.02em' }}>
+              <h1 className="text-foreground leading-[1.1] text-4xl sm:text-5xl lg:text-[4.5rem]" style={{ fontFamily: 'Playfair Display, serif', fontWeight: '600', letterSpacing: '-0.02em' }}>
                 Empowering Legal
-                <span className="block bg-gradient-to-r from-[#D4AF37] to-[#F4D03F] bg-clip-text text-transparent">Awareness</span>
+                <span className="block text-primary">Awareness</span>
               </h1>
 
-              <p className="text-gray-400 text-base sm:text-lg leading-relaxed max-w-lg">
+              <p className="text-muted-foreground text-base sm:text-lg leading-relaxed max-w-lg">
                 LawyerPedia is your trusted partner in legal education and advocacy. We bridge the gap between complex legal concepts and public understanding through expert articles, engaging content, and transformative conclaves.
               </p>
 
               <div className="flex items-center gap-4 sm:gap-5 sm:p-6 lg:p-8 pt-4 flex-wrap sm:flex-nowrap">
                 <div className="text-center">
-                  <div className="text-2xl sm:text-3xl mb-1 bg-gradient-to-r from-[#D4AF37] to-[#F4D03F] bg-clip-text text-transparent" style={{ fontFamily: 'Playfair Display, serif' }}>500K+</div>
+                  <div className="text-2xl sm:text-3xl mb-1 text-primary" style={{ fontFamily: 'Playfair Display, serif' }}>500K+</div>
                   <div className="text-gray-500 text-xs sm:text-sm">Followers Reached</div>
                 </div>
-                <div className="w-px h-10 sm:h-12 bg-[#D4AF37]/20" />
+                <div className="w-px h-10 sm:h-12 bg-border" />
                 <div className="text-center">
-                  <div className="text-2xl sm:text-3xl mb-1 bg-gradient-to-r from-[#D4AF37] to-[#F4D03F] bg-clip-text text-transparent" style={{ fontFamily: 'Playfair Display, serif' }}>1M+</div>
+                  <div className="text-2xl sm:text-3xl mb-1 text-primary" style={{ fontFamily: 'Playfair Display, serif' }}>1M+</div>
                   <div className="text-gray-500 text-xs sm:text-sm">Content Views</div>
                 </div>
-                <div className="w-px h-10 sm:h-12 bg-[#D4AF37]/20" />
+                <div className="w-px h-10 sm:h-12 bg-border" />
                 <div className="text-center">
-                  <div className="text-2xl sm:text-3xl mb-1 bg-gradient-to-r from-[#D4AF37] to-[#F4D03F] bg-clip-text text-transparent" style={{ fontFamily: 'Playfair Display, serif' }}>25+</div>
+                  <div className="text-2xl sm:text-3xl mb-1 text-primary" style={{ fontFamily: 'Playfair Display, serif' }}>25+</div>
                   <div className="text-gray-500 text-xs sm:text-sm">Events Hosted</div>
                 </div>
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                <button className="px-8 py-4 bg-gradient-to-r from-[#D4AF37] to-[#F4D03F] text-black rounded-lg hover:shadow-[0_0_40px_rgba(212,175,55,0.4)] transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 group">
+                <button className="px-8 py-4 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 hover:shadow-[0_0_40px_rgba(122,86,46,0.25)] transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 group">
                   <span>Explore Articles</span>
                   <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </button>
-                <button className="px-8 py-4 bg-transparent text-[#D4AF37] border border-[#D4AF37] rounded-lg hover:bg-[#D4AF37]/10 transition-all duration-300">
+                <button className="px-8 py-4 bg-transparent text-primary border border-primary rounded-lg hover:bg-primary/10 transition-all duration-300">
                   Join Conclave
                 </button>
               </div>

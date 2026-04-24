@@ -75,36 +75,36 @@ export default function ConsultationsManager() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl text-[#F5F5F5]" style={{ fontFamily: 'Playfair Display, serif' }}>Consultation Requests</h2>
-        <p className="text-sm text-gray-400 mt-1">Manage consultation form submissions</p>
+        <h2 className="text-2xl text-foreground" style={{ fontFamily: 'Playfair Display, serif' }}>Consultation Requests</h2>
+        <p className="text-sm text-muted-foreground mt-1">Manage consultation form submissions</p>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] rounded-xl border border-[#D4AF37]/20 p-6">
+        <div className="bg-card rounded-xl border border-border p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-400 mb-1">Total Requests</p>
-              <p className="text-3xl text-[#F5F5F5]" style={{ fontFamily: 'Playfair Display, serif' }}>{stats.total}</p>
+              <p className="text-sm text-muted-foreground mb-1">Total Requests</p>
+              <p className="text-3xl text-foreground" style={{ fontFamily: 'Playfair Display, serif' }}>{stats.total}</p>
             </div>
-            <MessageSquare className="w-10 h-10 text-[#D4AF37]/30" />
+            <MessageSquare className="w-10 h-10 text-primary/30" />
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] rounded-xl border border-yellow-500/20 p-6">
+        <div className="bg-card rounded-xl border border-primary/20 p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-400 mb-1">Pending</p>
-              <p className="text-3xl text-yellow-500" style={{ fontFamily: 'Playfair Display, serif' }}>{stats.pending}</p>
+              <p className="text-sm text-muted-foreground mb-1">Pending</p>
+              <p className="text-3xl text-primary" style={{ fontFamily: 'Playfair Display, serif' }}>{stats.pending}</p>
             </div>
-            <Clock className="w-10 h-10 text-yellow-500/30" />
+            <Clock className="w-10 h-10 text-primary/30" />
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] rounded-xl border border-green-500/20 p-6">
+        <div className="bg-card rounded-xl border border-green-500/20 p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-400 mb-1">Completed</p>
+              <p className="text-sm text-muted-foreground mb-1">Completed</p>
               <p className="text-3xl text-green-500" style={{ fontFamily: 'Playfair Display, serif' }}>{stats.completed}</p>
             </div>
             <CheckCircle className="w-10 h-10 text-green-500/30" />
@@ -118,8 +118,8 @@ export default function ConsultationsManager() {
           onClick={() => setFilter('all')}
           className={`px-4 py-2 rounded-lg text-sm transition-all ${
             filter === 'all'
-              ? 'bg-[#D4AF37] text-black'
-              : 'bg-[#1A1A1A] text-gray-400 hover:text-[#F5F5F5]'
+              ? 'bg-primary text-primary-foreground'
+              : 'bg-card text-muted-foreground hover:text-foreground'
           }`}
         >
           All ({stats.total})
@@ -128,8 +128,8 @@ export default function ConsultationsManager() {
           onClick={() => setFilter('pending')}
           className={`px-4 py-2 rounded-lg text-sm transition-all ${
             filter === 'pending'
-              ? 'bg-yellow-500 text-black'
-              : 'bg-[#1A1A1A] text-gray-400 hover:text-[#F5F5F5]'
+              ? 'bg-primary text-primary-foreground'
+              : 'bg-card text-muted-foreground hover:text-foreground'
           }`}
         >
           Pending ({stats.pending})
@@ -139,7 +139,7 @@ export default function ConsultationsManager() {
           className={`px-4 py-2 rounded-lg text-sm transition-all ${
             filter === 'completed'
               ? 'bg-green-500 text-black'
-              : 'bg-[#1A1A1A] text-gray-400 hover:text-[#F5F5F5]'
+              : 'bg-card text-muted-foreground hover:text-foreground'
           }`}
         >
           Completed ({stats.completed})
@@ -157,29 +157,29 @@ export default function ConsultationsManager() {
         {filteredConsultations.map((consultation) => (
           <div
             key={consultation.id}
-            className="bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] rounded-xl border border-[#D4AF37]/20 p-6 hover:border-[#D4AF37]/40 transition-all"
+            className="bg-card rounded-xl border border-border p-6 hover:border-primary/40 transition-all"
           >
             <div className="flex items-start justify-between gap-4 mb-4">
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-2">
-                  <h3 className="text-lg text-[#F5F5F5]">{consultation.name}</h3>
+                  <h3 className="text-lg text-foreground">{consultation.name}</h3>
                   <span className={`px-3 py-1 rounded-full text-xs ${
                     consultation.status === 'pending'
-                      ? 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/30'
+                      ? 'bg-primary/10 text-primary border border-primary/30'
                       : 'bg-green-500/10 text-green-500 border border-green-500/30'
                   }`}>
                     {consultation.status === 'pending' ? 'Pending' : 'Completed'}
                   </span>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-4 text-sm text-gray-400 mb-3">
+                <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-3">
                   <div className="flex items-center gap-2">
                     <Mail className="w-4 h-4" />
-                    <a href={`mailto:${consultation.email}`} className="hover:text-[#D4AF37]">{consultation.email}</a>
+                    <a href={`mailto:${consultation.email}`} className="hover:text-primary">{consultation.email}</a>
                   </div>
                   <div className="flex items-center gap-2">
                     <Phone className="w-4 h-4" />
-                    <a href={`tel:${consultation.phone}`} className="hover:text-[#D4AF37]">{consultation.phone}</a>
+                    <a href={`tel:${consultation.phone}`} className="hover:text-primary">{consultation.phone}</a>
                   </div>
                   <div className="flex items-center gap-2">
                     <Clock className="w-4 h-4" />
@@ -189,7 +189,7 @@ export default function ConsultationsManager() {
 
                 <div className="space-y-2">
                   <p className="text-sm text-gray-300"><span className="text-gray-400">Subject:</span> {consultation.subject}</p>
-                  <p className="text-sm text-gray-400">{consultation.message}</p>
+                  <p className="text-sm text-muted-foreground">{consultation.message}</p>
                 </div>
               </div>
 
@@ -199,7 +199,7 @@ export default function ConsultationsManager() {
                   className={`p-2 rounded-lg transition-all ${
                     consultation.status === 'pending'
                       ? 'text-green-400 hover:bg-green-500/10'
-                      : 'text-yellow-400 hover:bg-yellow-500/10'
+                      : 'text-primary hover:bg-primary/10'
                   }`}
                   title={consultation.status === 'pending' ? 'Mark as completed' : 'Mark as pending'}
                 >
