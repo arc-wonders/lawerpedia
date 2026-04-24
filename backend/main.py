@@ -128,6 +128,22 @@ def map_gallery(doc: Dict[str, Any]) -> Dict[str, Any]:
         "id": str(doc["_id"]),
         "title": doc.get("title"),
         "url": doc.get("url"),
+        "isFeatured": bool(doc.get("isFeatured", False)),
+        "createdAt": doc.get("createdAt"),
+        "updatedAt": doc.get("updatedAt"),
+    }
+
+
+def map_article(doc: Dict[str, Any]) -> Dict[str, Any]:
+    return {
+        "id": str(doc["_id"]),
+        "title": doc.get("title"),
+        "summary": doc.get("summary"),
+        "content": doc.get("content"),
+        "kind": doc.get("kind"),
+        "status": doc.get("status"),
+        "thumbnailUrl": doc.get("thumbnailUrl"),
+        "externalUrl": doc.get("externalUrl"),
         "createdAt": doc.get("createdAt"),
         "updatedAt": doc.get("updatedAt"),
     }
@@ -195,6 +211,25 @@ class GalleryCreateBody(BaseModel):
     url: str
 
 
+class GalleryUpdateBody(BaseModel):
+    title: Optional[str] = None
+    isFeatured: Optional[bool] = None
+
+
+ArticleKind = Literal["article", "update"]
+ArticleStatus = Literal["published", "draft"]
+
+
+class ArticleBody(BaseModel):
+    title: str
+    summary: str = ""
+    content: str = ""
+    kind: ArticleKind = "article"
+    status: ArticleStatus = "published"
+    thumbnailUrl: Optional[str] = None
+    externalUrl: Optional[str] = None
+
+
 ConclaveFormFieldType = Literal["text", "email", "phone", "textarea", "select"]
 
 
@@ -247,70 +282,110 @@ async def get_db() -> AsyncIOMotorDatabase:
 async def ensure_seed_data(db: AsyncIOMotorDatabase) -> None:
     conclaves_col = db["conclaves"]
     count = await conclaves_col.count_documents({})
-    if count != 0:
-        return
     ts = now_iso()
-    await conclaves_col.insert_many(
-        [
-            {
-                "title": "Legal Awareness Conclave 2026",
-                "date": "June 15, 2026",
-                "status": "upcoming",
-                "attendees": "Expected 600+",
-                "description": "A comprehensive event covering consumer rights, criminal law basics, and legal remedies for common issues.",
-                "fullDescription": "Join us for India's premier legal awareness conclave, designed to empower individuals with knowledge of their legal rights and remedies. This comprehensive event will feature expert speakers, interactive workshops, and networking opportunities with legal professionals from across the country.",
-                "highlights": [
-                    "Expert panel discussions on consumer protection laws",
-                    "Interactive workshops on criminal law basics",
-                    "Legal aid clinic with free consultations",
-                    "Networking opportunities with legal professionals",
-                    "Certificate of participation",
-                ],
-                "venue": "India Habitat Centre, New Delhi",
-                "time": "9:00 AM - 6:00 PM",
-                "createdAt": ts,
-                "updatedAt": ts,
-            },
-            {
-                "title": "Corporate Law Summit 2025",
-                "date": "November 12, 2025",
-                "status": "past",
-                "attendees": "500+",
-                "description": "Successfully conducted summit on startup legal compliance, attended by 500+ entrepreneurs and legal professionals.",
-                "fullDescription": "Our Corporate Law Summit brought together leading entrepreneurs, legal experts, and policymakers to discuss the evolving landscape of startup legal compliance in India. The event featured keynote speeches, panel discussions, and hands-on workshops.",
-                "highlights": [
-                    "Keynote by prominent startup lawyers",
-                    "Panel on recent regulatory changes",
-                    "Workshops on incorporation and compliance",
-                    "Investor-founder legal relationship sessions",
-                    "Networking with 500+ attendees",
-                ],
-                "venue": "The Leela Ambience, Gurugram",
-                "time": "Full Day Event",
-                "createdAt": ts,
-                "updatedAt": ts,
-            },
-            {
-                "title": "Women's Legal Rights Workshop",
-                "date": "August 20, 2025",
-                "status": "past",
-                "attendees": "300+",
-                "description": "Empowering workshop focusing on women's legal rights, property laws, and domestic violence protection.",
-                "fullDescription": "An empowering day dedicated to educating women about their legal rights in India. This workshop covered crucial topics including property rights, matrimonial laws, workplace harassment, and domestic violence protection mechanisms.",
-                "highlights": [
-                    "Sessions on property and inheritance rights",
-                    "Understanding domestic violence laws",
-                    "Workplace harassment prevention",
-                    "Legal aid resources and support systems",
-                    "One-on-one legal counseling",
-                ],
-                "venue": "India International Centre, New Delhi",
-                "time": "10:00 AM - 5:00 PM",
-                "createdAt": ts,
-                "updatedAt": ts,
-            },
-        ]
-    )
+    if count == 0:
+        await conclaves_col.insert_many(
+            [
+                {
+                    "title": "Legal Awareness Conclave 2026",
+                    "date": "June 15, 2026",
+                    "status": "upcoming",
+                    "attendees": "Expected 600+",
+                    "description": "A comprehensive event covering consumer rights, criminal law basics, and legal remedies for common issues.",
+                    "fullDescription": "Join us for India's premier legal awareness conclave, designed to empower individuals with knowledge of their legal rights and remedies. This comprehensive event will feature expert speakers, interactive workshops, and networking opportunities with legal professionals from across the country.",
+                    "highlights": [
+                        "Expert panel discussions on consumer protection laws",
+                        "Interactive workshops on criminal law basics",
+                        "Legal aid clinic with free consultations",
+                        "Networking opportunities with legal professionals",
+                        "Certificate of participation",
+                    ],
+                    "venue": "India Habitat Centre, New Delhi",
+                    "time": "9:00 AM - 6:00 PM",
+                    "createdAt": ts,
+                    "updatedAt": ts,
+                },
+                {
+                    "title": "Corporate Law Summit 2025",
+                    "date": "November 12, 2025",
+                    "status": "past",
+                    "attendees": "500+",
+                    "description": "Successfully conducted summit on startup legal compliance, attended by 500+ entrepreneurs and legal professionals.",
+                    "fullDescription": "Our Corporate Law Summit brought together leading entrepreneurs, legal experts, and policymakers to discuss the evolving landscape of startup legal compliance in India. The event featured keynote speeches, panel discussions, and hands-on workshops.",
+                    "highlights": [
+                        "Keynote by prominent startup lawyers",
+                        "Panel on recent regulatory changes",
+                        "Workshops on incorporation and compliance",
+                        "Investor-founder legal relationship sessions",
+                        "Networking with 500+ attendees",
+                    ],
+                    "venue": "The Leela Ambience, Gurugram",
+                    "time": "Full Day Event",
+                    "createdAt": ts,
+                    "updatedAt": ts,
+                },
+                {
+                    "title": "Women's Legal Rights Workshop",
+                    "date": "August 20, 2025",
+                    "status": "past",
+                    "attendees": "300+",
+                    "description": "Empowering workshop focusing on women's legal rights, property laws, and domestic violence protection.",
+                    "fullDescription": "An empowering day dedicated to educating women about their legal rights in India. This workshop covered crucial topics including property rights, matrimonial laws, workplace harassment, and domestic violence protection mechanisms.",
+                    "highlights": [
+                        "Sessions on property and inheritance rights",
+                        "Understanding domestic violence laws",
+                        "Workplace harassment prevention",
+                        "Legal aid resources and support systems",
+                        "One-on-one legal counseling",
+                    ],
+                    "venue": "India International Centre, New Delhi",
+                    "time": "10:00 AM - 5:00 PM",
+                    "createdAt": ts,
+                    "updatedAt": ts,
+                },
+            ]
+        )
+
+    articles_col = db["articles"]
+    articles_count = await articles_col.count_documents({})
+    if articles_count == 0:
+        await articles_col.insert_many(
+            [
+                {
+                    "title": "Understanding Your Rights in Consumer Disputes",
+                    "summary": "A practical guide to consumer protection laws, refunds, and dispute resolution steps.",
+                    "content": "Consumer disputes are common — from defective products to delayed services.\n\nThis article explains the basics of consumer rights, what documents to keep, and how to approach grievance redressal.\n\nIf you need help, book a consultation through LawyerPedia.",
+                    "kind": "article",
+                    "status": "published",
+                    "thumbnailUrl": None,
+                    "externalUrl": None,
+                    "createdAt": ts,
+                    "updatedAt": ts,
+                },
+                {
+                    "title": "Update: Free Legal Aid Camp (This Weekend)",
+                    "summary": "Join us for a free legal consultation drive with limited slots.",
+                    "content": "We are organizing a free legal aid camp this weekend.\n\nBring any relevant documents and be on time. Slots are limited and will be served on a first-come basis.",
+                    "kind": "update",
+                    "status": "published",
+                    "thumbnailUrl": None,
+                    "externalUrl": None,
+                    "createdAt": ts,
+                    "updatedAt": ts,
+                },
+                {
+                    "title": "Corporate Compliance Checklist for Startups",
+                    "summary": "A beginner-friendly compliance checklist for founders: filings, contracts, and risk basics.",
+                    "content": "Compliance can feel overwhelming when you're building.\n\nThis checklist covers essential filings, basic contract hygiene, and common mistakes to avoid.",
+                    "kind": "article",
+                    "status": "published",
+                    "thumbnailUrl": None,
+                    "externalUrl": None,
+                    "createdAt": ts,
+                    "updatedAt": ts,
+                },
+            ]
+        )
 
 
 async def ensure_admin_user(db: AsyncIOMotorDatabase) -> None:
@@ -463,6 +538,30 @@ async def public_gallery(request: Request, db: AsyncIOMotorDatabase = Depends(ge
             item["url"] = media_url(request, media_id)
         items.append(item)
     return {"items": items}
+
+
+@app.get("/api/articles")
+async def public_list_articles(db: AsyncIOMotorDatabase = Depends(get_db)) -> Dict[str, Any]:
+    docs = await (
+        db["articles"]
+        .find({"status": "published"})
+        .sort("createdAt", -1)
+        .to_list(length=1000)
+    )
+    items = [map_article(d) for d in docs]
+    # Public list does not need full content payload; keep responses light.
+    for it in items:
+        it["content"] = ""
+    return {"items": items}
+
+
+@app.get("/api/articles/{id}")
+async def public_get_article(id: str, db: AsyncIOMotorDatabase = Depends(get_db)) -> Dict[str, Any]:
+    oid = oid_or_400(id)
+    doc = await db["articles"].find_one({"_id": oid, "status": "published"})
+    if not doc:
+        raise HTTPException(status_code=404, detail="Not found")
+    return {"item": map_article(doc)}
 
 
 @app.get("/api/media/{id}")
@@ -981,6 +1080,65 @@ async def admin_list_gallery(
     return {"items": items}
 
 
+@app.get("/api/admin/articles")
+async def admin_list_articles(
+    _admin: Dict[str, Any] = Depends(require_admin),
+    db: AsyncIOMotorDatabase = Depends(get_db),
+) -> Dict[str, Any]:
+    docs = await db["articles"].find({}).sort("createdAt", -1).to_list(length=2000)
+    return {"items": [map_article(d) for d in docs]}
+
+
+@app.post("/api/admin/articles", status_code=status.HTTP_201_CREATED)
+async def admin_create_article(
+    body: ArticleBody,
+    _admin: Dict[str, Any] = Depends(require_admin),
+    db: AsyncIOMotorDatabase = Depends(get_db),
+) -> Dict[str, Any]:
+    ts = now_iso()
+    result = await db["articles"].insert_one(
+        {
+            **body.model_dump(),
+            "createdAt": ts,
+            "updatedAt": ts,
+        }
+    )
+    doc = await db["articles"].find_one({"_id": result.inserted_id})
+    return {"item": map_article(doc)}
+
+
+@app.put("/api/admin/articles/{id}")
+async def admin_update_article(
+    id: str,
+    body: ArticleBody,
+    _admin: Dict[str, Any] = Depends(require_admin),
+    db: AsyncIOMotorDatabase = Depends(get_db),
+) -> Dict[str, Any]:
+    oid = oid_or_400(id)
+    ts = now_iso()
+    result = await db["articles"].find_one_and_update(
+        {"_id": oid},
+        {"$set": {**body.model_dump(), "updatedAt": ts}},
+        return_document=ReturnDocument.AFTER,
+    )
+    if not result:
+        raise HTTPException(status_code=404, detail="Not found")
+    return {"item": map_article(result)}
+
+
+@app.delete("/api/admin/articles/{id}", status_code=status.HTTP_204_NO_CONTENT)
+async def admin_delete_article(
+    id: str,
+    _admin: Dict[str, Any] = Depends(require_admin),
+    db: AsyncIOMotorDatabase = Depends(get_db),
+) -> None:
+    oid = oid_or_400(id)
+    result = await db["articles"].delete_one({"_id": oid})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Not found")
+    return None
+
+
 @app.post("/api/admin/gallery", status_code=status.HTTP_201_CREATED)
 async def admin_create_gallery(
     body: GalleryCreateBody,
@@ -1032,6 +1190,45 @@ async def admin_upload_gallery_image(
     doc = await db["gallery"].find_one({"_id": insert.inserted_id})
     item = map_gallery(doc)
     item["url"] = media_url(request, doc["mediaId"])
+    return {"item": item}
+
+
+@app.patch("/api/admin/gallery/{id}")
+async def admin_update_gallery(
+    id: str,
+    request: Request,
+    body: GalleryUpdateBody,
+    _admin: Dict[str, Any] = Depends(require_admin),
+    db: AsyncIOMotorDatabase = Depends(get_db),
+) -> Dict[str, Any]:
+    oid = oid_or_400(id)
+    patch: Dict[str, Any] = {}
+    if body.title is not None:
+        patch["title"] = body.title
+    if body.isFeatured is not None:
+        patch["isFeatured"] = bool(body.isFeatured)
+
+    if not patch:
+        doc = await db["gallery"].find_one({"_id": oid})
+        if not doc:
+            raise HTTPException(status_code=404, detail="Not found")
+        item = map_gallery(doc)
+        if doc.get("mediaId"):
+            item["url"] = media_url(request, doc["mediaId"])
+        return {"item": item}
+
+    patch["updatedAt"] = now_iso()
+    result = await db["gallery"].find_one_and_update(
+        {"_id": oid},
+        {"$set": patch},
+        return_document=ReturnDocument.AFTER,
+    )
+    if not result:
+        raise HTTPException(status_code=404, detail="Not found")
+
+    item = map_gallery(result)
+    if result.get("mediaId"):
+        item["url"] = media_url(request, result["mediaId"])
     return {"item": item}
 
 

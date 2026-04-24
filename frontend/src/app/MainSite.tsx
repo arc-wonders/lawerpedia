@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { X, Menu, Scale, Briefcase, FileText, Users, Calendar, Instagram, Linkedin, Twitter, Mail, Phone, MapPin, Award, BookOpen, Video, Bell, ChevronRight, Gavel, Shield, Building2, UserCheck, ClipboardCheck, TrendingUp, Eye } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { X, Menu, Scale, Briefcase, FileText, Users, Calendar, Instagram, Linkedin, Twitter, Mail, Phone, MapPin, Award, BookOpen, Video, Bell, ChevronRight, Gavel, Shield, Building2, UserCheck, ClipboardCheck } from 'lucide-react';
 import mehakImage from '../imports/ms.jpg';
 import ConsultationForm from './components/ConsultationForm';
 import { apiJson } from './api';
@@ -24,10 +25,22 @@ interface GalleryImage {
   id: string;
   title: string;
   url: string;
+  isFeatured?: boolean;
   createdAt: string;
 }
 
+interface ArticleItem {
+  id: string;
+  title: string;
+  summary?: string | null;
+  kind?: 'article' | 'update' | null;
+  thumbnailUrl?: string | null;
+  externalUrl?: string | null;
+  createdAt?: string;
+}
+
 export default function MainSite() {
+  const navigate = useNavigate();
   const [showConclavePopup, setShowConclavePopup] = useState(false);
   const [popupConclaveIndex, setPopupConclaveIndex] = useState<number | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -35,6 +48,7 @@ export default function MainSite() {
   const [showConsultationForm, setShowConsultationForm] = useState(false);
   const [conclaves, setConclaves] = useState<Conclave[]>([]);
   const [gallery, setGallery] = useState<GalleryImage[]>([]);
+  const [articles, setArticles] = useState<ArticleItem[]>([]);
 
   const [showConclaveRegistration, setShowConclaveRegistration] = useState(false);
   const [registrationForm, setRegistrationForm] = useState<ConclaveForm | null>(null);
@@ -123,6 +137,19 @@ export default function MainSite() {
     };
     load();
   }, []);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await apiJson<{ items: ArticleItem[] }>('/api/articles');
+        setArticles(res.items || []);
+      } catch {
+        setArticles([]);
+      }
+    };
+    load();
+  }, []);
+
 
   useEffect(() => {
     if (selectedConclave !== null) {
@@ -273,7 +300,7 @@ export default function MainSite() {
                   <div className="text-center">
                     <button
                       onClick={() => openRegistration(selectedConclave)}
-                      className="px-10 py-4 bg-gradient-to-r from-[#D4AF37] to-[#F4D03F] text-black rounded-lg hover:shadow-[0_0_40px_rgba(212,175,55,0.4)] transition-all duration-300 hover:scale-105"
+                      className="px-10 py-4 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 hover:shadow-[0_0_40px_rgba(122,86,46,0.25)] transition-all duration-300 hover:scale-105 border border-primary/30"
                     >
                       Register for This Event
                     </button>
@@ -352,7 +379,7 @@ export default function MainSite() {
                         setShowConclavePopup(false);
                         setSelectedConclave(popupConclaveIndex);
                       }}
-                      className="px-5 py-3 bg-transparent text-primary border border-primary rounded-lg hover:bg-primary/10 transition-all"
+                      className="px-5 py-3 bg-card text-foreground border border-border rounded-lg hover:bg-muted transition-all droplet-btn"
                     >
                       View details
                     </button>
@@ -734,156 +761,74 @@ export default function MainSite() {
               <div className="w-24 h-px bg-gradient-to-l from-transparent to-[#D4AF37]" />
             </div>
             <p className="text-gray-400 max-w-2xl mx-auto text-base sm:text-lg leading-relaxed">
-              Latest articles, Instagram reels, and important announcements from the legal world.
+              Latest articles and important announcements from the legal world.
             </p>
 
-            <div className="flex items-center justify-center gap-5 sm:p-6 lg:p-8 mt-12">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-[#D4AF37] rounded-full animate-pulse" />
-                <span className="text-gray-400 text-sm">Live Content Feed</span>
-              </div>
-              <div className="flex items-center gap-3 text-sm text-gray-500">
-                <TrendingUp className="w-4 h-4 text-[#D4AF37]" />
-                <span>Updated Daily</span>
-              </div>
-            </div>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 sm:p-6 lg:p-8">
-            <div className="group bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] p-5 sm:p-6 lg:p-8 rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 transition-all duration-300 hover:shadow-[0_0_40px_rgba(212,175,55,0.2)] hover:scale-105">
-              <div className="flex items-start gap-5">
-                <div className="w-20 h-20 bg-gradient-to-br from-[#D4AF37]/20 to-[#D4AF37]/5 rounded-xl flex items-center justify-center flex-shrink-0 border border-[#D4AF37]/30 group-hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] transition-all">
-                  <BookOpen className="w-9 h-9 text-[#D4AF37]" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="text-xs text-gray-500">2 hours ago</div>
-                    <div className="flex items-center gap-1.5 text-xs text-gray-500">
-                      <Eye className="w-3 h-3" />
-                      <span>12.5K</span>
-                    </div>
-                  </div>
-                  <h4 className="mb-3 text-[#F5F5F5] leading-snug text-lg sm:text-xl" style={{ fontFamily: 'Playfair Display, serif' }}>Understanding Your Rights in Consumer Disputes</h4>
-                  <p className="text-gray-400 text-sm mb-4 leading-relaxed">A comprehensive guide to consumer protection laws in India...</p>
-                  <a href="#" className="text-[#D4AF37] text-sm hover:underline inline-flex items-center gap-1.5 group-hover:gap-2.5 transition-all">
-                    Read More <ChevronRight className="w-4 h-4" />
-                  </a>
-                </div>
+            {articles.length === 0 && (
+              <div className="col-span-full text-center py-12 text-gray-400">
+                <BookOpen className="w-16 h-16 mx-auto mb-4 opacity-20" />
+                <p>No updates yet.</p>
               </div>
-            </div>
+            )}
 
-            <div className="group bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] p-5 sm:p-6 lg:p-8 rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 transition-all duration-300 hover:shadow-[0_0_40px_rgba(212,175,55,0.2)] hover:scale-105">
-              <div className="flex items-start gap-5">
-                <div className="w-20 h-20 bg-gradient-to-br from-[#D4AF37]/20 to-[#D4AF37]/5 rounded-xl flex items-center justify-center flex-shrink-0 border border-[#D4AF37]/30 group-hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] transition-all">
-                  <Video className="w-9 h-9 text-[#D4AF37]" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="text-xs text-gray-500">5 hours ago</div>
-                    <div className="flex items-center gap-1.5 text-xs text-gray-500">
-                      <Eye className="w-3 h-3" />
-                      <span>28.3K</span>
+            {articles.slice(0, 6).map((a) => {
+              const kind = (a.kind || 'article') as 'article' | 'update';
+              const Icon = kind === 'update' ? Bell : BookOpen;
+              const date = a.createdAt
+                ? new Date(a.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+                : '';
+              return (
+                <div
+                  key={a.id}
+                  className="group bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] p-5 sm:p-6 lg:p-8 rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 transition-all duration-300 hover:shadow-[0_0_40px_rgba(212,175,55,0.2)] hover:scale-105"
+                >
+                  <div className="flex items-start gap-5">
+                    <div className="w-20 h-20 bg-gradient-to-br from-[#D4AF37]/20 to-[#D4AF37]/5 rounded-xl flex items-center justify-center flex-shrink-0 border border-[#D4AF37]/30 group-hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] transition-all overflow-hidden">
+                      {a.thumbnailUrl ? (
+                        <img src={a.thumbnailUrl} alt={a.title} className="h-full w-full object-cover" />
+                      ) : (
+                        <Icon className="w-9 h-9 text-[#D4AF37]" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-3">
+                        {date && <div className="text-xs text-gray-500">{date}</div>}
+                        <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-[#D4AF37]/10 rounded-full">
+                          <span className="text-xs text-[#D4AF37]">{kind === 'update' ? 'Update' : 'Article'}</span>
+                        </div>
+                      </div>
+                      <h4 className="mb-3 text-[#F5F5F5] leading-snug text-lg sm:text-xl" style={{ fontFamily: 'Playfair Display, serif' }}>
+                        {a.title}
+                      </h4>
+                      {a.summary && (
+                        <p className="text-gray-400 text-sm mb-4 leading-relaxed">
+                          {a.summary}
+                        </p>
+                      )}
+                      <button
+                        onClick={() => {
+                          if (a.externalUrl) window.open(a.externalUrl, '_blank', 'noopener,noreferrer');
+                          else navigate(`/articles/${a.id}`);
+                        }}
+                        className="text-[#D4AF37] text-sm hover:underline inline-flex items-center gap-1.5 group-hover:gap-2.5 transition-all droplet-btn"
+                      >
+                        View <ChevronRight className="w-4 h-4" />
+                      </button>
                     </div>
                   </div>
-                  <h4 className="mb-3 text-[#F5F5F5] leading-snug text-lg sm:text-xl" style={{ fontFamily: 'Playfair Display, serif' }}>New Reel: What is Section 498A?</h4>
-                  <p className="text-gray-400 text-sm mb-4 leading-relaxed">Quick explainer on domestic violence laws in 60 seconds...</p>
-                  <a href="#" className="text-[#D4AF37] text-sm hover:underline inline-flex items-center gap-1.5 group-hover:gap-2.5 transition-all">
-                    Watch Now <ChevronRight className="w-4 h-4" />
-                  </a>
                 </div>
-              </div>
-            </div>
-
-            <div className="group bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] p-5 sm:p-6 lg:p-8 rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 transition-all duration-300 hover:shadow-[0_0_40px_rgba(212,175,55,0.2)] hover:scale-105">
-              <div className="flex items-start gap-5">
-                <div className="w-20 h-20 bg-gradient-to-br from-[#D4AF37]/20 to-[#D4AF37]/5 rounded-xl flex items-center justify-center flex-shrink-0 border border-[#D4AF37]/30 group-hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] transition-all">
-                  <Bell className="w-9 h-9 text-[#D4AF37]" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="text-xs text-gray-500">1 day ago</div>
-                    <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-[#D4AF37]/10 rounded-full">
-                      <span className="text-xs text-[#D4AF37]">Featured</span>
-                    </div>
-                  </div>
-                  <h4 className="mb-3 text-[#F5F5F5] leading-snug text-lg sm:text-xl" style={{ fontFamily: 'Playfair Display, serif' }}>Announcement: Free Legal Aid Camp</h4>
-                  <p className="text-gray-400 text-sm mb-4 leading-relaxed">Join us this weekend for a free legal consultation drive...</p>
-                  <a href="#" className="text-[#D4AF37] text-sm hover:underline inline-flex items-center gap-1.5 group-hover:gap-2.5 transition-all">
-                    Learn More <ChevronRight className="w-4 h-4" />
-                  </a>
-                </div>
-              </div>
-            </div>
-
-            <div className="group bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] p-5 sm:p-6 lg:p-8 rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 transition-all duration-300 hover:shadow-[0_0_40px_rgba(212,175,55,0.2)] hover:scale-105">
-              <div className="flex items-start gap-5">
-                <div className="w-20 h-20 bg-gradient-to-br from-[#D4AF37]/20 to-[#D4AF37]/5 rounded-xl flex items-center justify-center flex-shrink-0 border border-[#D4AF37]/30 group-hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] transition-all">
-                  <FileText className="w-9 h-9 text-[#D4AF37]" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="text-xs text-gray-500">2 days ago</div>
-                    <div className="flex items-center gap-1.5 text-xs text-gray-500">
-                      <Eye className="w-3 h-3" />
-                      <span>9.2K</span>
-                    </div>
-                  </div>
-                  <h4 className="mb-3 text-[#F5F5F5] leading-snug text-lg sm:text-xl" style={{ fontFamily: 'Playfair Display, serif' }}>Corporate Law Update: New Compliance Requirements</h4>
-                  <p className="text-gray-400 text-sm mb-4 leading-relaxed">Latest changes in corporate compliance you need to know...</p>
-                  <a href="#" className="text-[#D4AF37] text-sm hover:underline inline-flex items-center gap-1.5 group-hover:gap-2.5 transition-all">
-                    Read More <ChevronRight className="w-4 h-4" />
-                  </a>
-                </div>
-              </div>
-            </div>
-
-            <div className="group bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] p-5 sm:p-6 lg:p-8 rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 transition-all duration-300 hover:shadow-[0_0_40px_rgba(212,175,55,0.2)] hover:scale-105">
-              <div className="flex items-start gap-5">
-                <div className="w-20 h-20 bg-gradient-to-br from-[#D4AF37]/20 to-[#D4AF37]/5 rounded-xl flex items-center justify-center flex-shrink-0 border border-[#D4AF37]/30 group-hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] transition-all">
-                  <Instagram className="w-9 h-9 text-[#D4AF37]" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="text-xs text-gray-500">3 days ago</div>
-                    <div className="flex items-center gap-1.5 text-xs text-gray-500">
-                      <Eye className="w-3 h-3" />
-                      <span>45.7K</span>
-                    </div>
-                  </div>
-                  <h4 className="mb-3 text-[#F5F5F5] leading-snug text-lg sm:text-xl" style={{ fontFamily: 'Playfair Display, serif' }}>Instagram Series: Know Your Rights</h4>
-                  <p className="text-gray-400 text-sm mb-4 leading-relaxed">New 5-part series covering fundamental rights in India...</p>
-                  <a href="#" className="text-[#D4AF37] text-sm hover:underline inline-flex items-center gap-1.5 group-hover:gap-2.5 transition-all">
-                    View Series <ChevronRight className="w-4 h-4" />
-                  </a>
-                </div>
-              </div>
-            </div>
-
-            <div className="group bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] p-5 sm:p-6 lg:p-8 rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 transition-all duration-300 hover:shadow-[0_0_40px_rgba(212,175,55,0.2)] hover:scale-105">
-              <div className="flex items-start gap-5">
-                <div className="w-20 h-20 bg-gradient-to-br from-[#D4AF37]/20 to-[#D4AF37]/5 rounded-xl flex items-center justify-center flex-shrink-0 border border-[#D4AF37]/30 group-hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] transition-all">
-                  <Award className="w-9 h-9 text-[#D4AF37]" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="text-xs text-gray-500">1 week ago</div>
-                    <div className="flex items-center gap-1.5 text-xs text-gray-500">
-                      <Eye className="w-3 h-3" />
-                      <span>18.1K</span>
-                    </div>
-                  </div>
-                  <h4 className="mb-3 text-[#F5F5F5] leading-snug text-lg sm:text-xl" style={{ fontFamily: 'Playfair Display, serif' }}>LawyerPedia Wins Legal Awareness Award</h4>
-                  <p className="text-gray-400 text-sm mb-4 leading-relaxed">Recognized for outstanding contribution to legal education...</p>
-                  <a href="#" className="text-[#D4AF37] text-sm hover:underline inline-flex items-center gap-1.5 group-hover:gap-2.5 transition-all">
-                    Read More <ChevronRight className="w-4 h-4" />
-                  </a>
-                </div>
-              </div>
-            </div>
+              );
+            })}
           </div>
 
           <div className="text-center mt-16">
-            <button className="px-10 py-4 bg-gradient-to-r from-[#D4AF37] to-[#F4D03F] text-black rounded-lg hover:shadow-[0_0_40px_rgba(212,175,55,0.4)] transition-all duration-300 hover:scale-105">
+            <button
+              onClick={() => navigate('/articles')}
+              className="px-10 py-4 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 hover:shadow-[0_0_40px_rgba(122,86,46,0.25)] transition-all duration-300 hover:scale-105 border border-primary/30"
+            >
               View All Updates
             </button>
           </div>
@@ -985,8 +930,8 @@ export default function MainSite() {
                       onClick={() => setSelectedConclave(index)}
                       className={`w-full px-6 py-3.5 rounded-lg transition-all duration-300 ${
                         isUpcoming
-                          ? 'bg-gradient-to-r from-[#D4AF37] to-[#F4D03F] text-black hover:shadow-[0_0_30px_rgba(212,175,55,0.4)] hover:scale-105'
-                          : 'bg-transparent text-[#D4AF37] border border-[#D4AF37] hover:bg-[#D4AF37]/10'
+                          ? 'bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-[0_0_30px_rgba(122,86,46,0.25)] hover:scale-105 border border-primary/30 droplet-btn'
+                          : 'bg-card text-foreground border border-border hover:bg-muted droplet-btn'
                       }`}
                     >
                       View Details
@@ -1027,7 +972,7 @@ export default function MainSite() {
               </div>
             )}
 
-            {gallery.map((image) => (
+            {(gallery.filter(g => g.isFeatured).length > 0 ? gallery.filter(g => g.isFeatured).slice(0, 4) : gallery.slice(0, 4)).map((image) => (
               <div
                 key={image.id}
                 className="group aspect-square bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] rounded-2xl overflow-hidden cursor-pointer border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 hover:shadow-[0_0_40px_rgba(212,175,55,0.25)] transition-all duration-300 hover:scale-105 relative"
@@ -1048,6 +993,17 @@ export default function MainSite() {
               </div>
             ))}
           </div>
+
+          {gallery.length > 4 && (
+            <div className="text-center mt-12">
+              <button
+                onClick={() => navigate('/gallery')}
+                className="px-10 py-4 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 hover:shadow-[0_0_40px_rgba(122,86,46,0.25)] transition-all duration-300 hover:scale-105 border border-primary/30 droplet-btn"
+              >
+                View All Photos
+              </button>
+            </div>
+          )}
         </div>
       </section>
 

@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Scale, LogOut, Calendar, MessageSquare, Image, Home } from 'lucide-react';
+import { Scale, LogOut, Calendar, MessageSquare, Image, Home, FileText } from 'lucide-react';
 import ConclavesManager from './ConclavesManager';
 import ConsultationsManager from './ConsultationsManager';
 import GalleryManager from './GalleryManager';
+import ArticlesManager from './ArticlesManager';
 
 interface AdminDashboardProps {
   onLogout: () => void;
@@ -10,7 +11,7 @@ interface AdminDashboardProps {
 }
 
 export default function AdminDashboard({ onLogout, onBackToSite }: AdminDashboardProps) {
-  const [activeTab, setActiveTab] = useState<'conclaves' | 'consultations' | 'gallery'>('conclaves');
+  const [activeTab, setActiveTab] = useState<'conclaves' | 'consultations' | 'gallery' | 'articles'>('conclaves');
 
   return (
     <div className="min-h-screen bg-[#0A0A0A]" style={{ fontFamily: 'Inter, sans-serif' }}>
@@ -86,6 +87,17 @@ export default function AdminDashboard({ onLogout, onBackToSite }: AdminDashboar
               <Image className="w-5 h-5" />
               <span>Gallery</span>
             </button>
+            <button
+              onClick={() => setActiveTab('articles')}
+              className={`flex items-center gap-2 px-6 py-4 border-b-2 transition-all whitespace-nowrap ${
+                activeTab === 'articles'
+                  ? 'border-[#D4AF37] text-[#D4AF37]'
+                  : 'border-transparent text-gray-400 hover:text-[#F5F5F5]'
+              }`}
+            >
+              <FileText className="w-5 h-5" />
+              <span>Articles</span>
+            </button>
           </div>
         </div>
       </div>
@@ -95,6 +107,7 @@ export default function AdminDashboard({ onLogout, onBackToSite }: AdminDashboar
         {activeTab === 'conclaves' && <ConclavesManager />}
         {activeTab === 'consultations' && <ConsultationsManager />}
         {activeTab === 'gallery' && <GalleryManager />}
+        {activeTab === 'articles' && <ArticlesManager />}
       </div>
     </div>
   );

@@ -326,6 +326,47 @@
     --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-via), var(--tw-gradient-to);
   }
 
+  @keyframes droplet-ripple {
+    0% {
+      transform: translate(-50%, -50%) scale(0.1);
+      opacity: 0.35;
+    }
+    70% {
+      opacity: 0.18;
+    }
+    100% {
+      transform: translate(-50%, -50%) scale(18);
+      opacity: 0;
+    }
+  }
+
+  .droplet-btn {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .droplet-btn::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 12px;
+    height: 12px;
+    border-radius: 9999px;
+    background: color-mix(in oklab, var(--color-primary) 55%, transparent);
+    transform: translate(-50%, -50%) scale(0.1);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .droplet-btn:hover::after {
+    animation: droplet-ripple 850ms ease-out;
+  }
+
+  .droplet-btn:active::after {
+    animation: droplet-ripple 650ms ease-out;
+  }
+
   /* Re-map gold glow shadows used in legacy UI. */
   .shadow-\[0_20px_80px_rgba\(212\,175\,55\,0\.2\)\] {
     box-shadow: 0 20px 80px rgba(122, 86, 46, 0.12);

@@ -1,11 +1,12 @@
-import { useState, useEffect } from 'react';
-import { Image as ImageIcon, Plus, Trash2, Upload } from 'lucide-react';
+import { useRef, useState, useEffect } from 'react';
+import { Image as ImageIcon, Plus, Trash2, Upload, Star } from 'lucide-react';
 import { apiFetch, apiJson } from '../../api';
 
 interface GalleryImage {
   id: string;
   title: string;
   url: string;
+  isFeatured?: boolean;
   createdAt: string;
 }
 
@@ -14,6 +15,7 @@ export default function GalleryManager() {
   const [isLoading, setIsLoading] = useState(false);
   const [uploadTitle, setUploadTitle] = useState('');
   const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -49,20 +51,25 @@ export default function GalleryManager() {
     }
   };
 
-  const handleUpload = async (file: File) => {
+  const handleUpload = async (files: FileList | File[]) => {
+    const list = Array.from(files || []);
+    if (list.length === 0) return;
+
     setIsUploading(true);
     try {
-      const form = new FormData();
-      form.append('file', file);
-      form.append('title', uploadTitle);
+      for (const file of list) {
+        const form = new FormData();
+        form.append('file', file);
+        form.append('title', uploadTitle || file.name);
 
-      const res = await apiFetch('/api/admin/gallery/upload', {
-        method: 'POST',
-        body: form,
-        admin: true
-      });
-      const payload = (await res.json()) as { item: GalleryImage };
-      setImages(prev => [payload.item, ...prev]);
+        const res = await apiFetch('/api/admin/gallery/upload', {
+          method: 'POST',
+          body: form,
+          admin: true
+        });
+        const payload = (await res.json()) as { item: GalleryImage };
+        setImages(prev => [payload.item, ...prev]);
+      }
       setUploadTitle('');
     } catch (err: any) {
       alert(err?.message || 'Failed to upload image');
@@ -82,6 +89,28 @@ export default function GalleryManager() {
     }
   };
 
+  const toggleFeatured = async (img: GalleryImage) => {
+    const next = !img.isFeatured;
+    const featuredCount = images.filter(i => i.isFeatured).length;
+    if (next && featuredCount >= 4) {
+      alert('You can feature only 4 images on the homepage. Unfeature one first.');
+      return;
+    }
+
+    try {
+      const res = await apiJson<{ item: GalleryImage }>(`/api/admin/gallery/${img.id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ isFeatured: next }),
+        admin: true
+      });
+      setImages(prev => prev.map(i => (i.id === img.id ? res.item : i)));
+    } catch (err: any) {
+      alert(err?.message || 'Failed to update featured status');
+    }
+  };
+
+  const featuredCount = images.filter(i => i.isFeatured).length;
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -89,24 +118,48 @@ export default function GalleryManager() {
           <h2 className="text-2xl text-[#F5F5F5]" style={{ fontFamily: 'Playfair Display, serif' }}>Gallery Management</h2>
           <p className="text-sm text-gray-400 mt-1">Manage event photos and gallery images</p>
         </div>
-        <button
-          onClick={handleAdd}
-          className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#D4AF37] to-[#F4D03F] text-black rounded-lg hover:shadow-[0_0_30px_rgba(122,86,46,0.3)] transition-all"
-        >
-          <Plus className="w-5 h-5" />
-          Add Image
-        </button>
+        <div className="flex items-center gap-3">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            multiple
+            disabled={isUploading}
+            onChange={(e) => {
+              const files = e.target.files;
+              if (files) handleUpload(files);
+              e.target.value = '';
+            }}
+            className="hidden"
+          />
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isUploading}
+            className="group droplet-btn flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg border border-primary/30 shadow-sm hover:bg-primary/90 hover:shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-60 disabled:hover:scale-100 disabled:cursor-not-allowed"
+            title="Upload photos"
+          >
+            {isUploading ? (
+              <div className="w-5 h-5 rounded-full border-2 border-primary-foreground/70 border-t-transparent animate-spin" />
+            ) : (
+              <Upload className="w-5 h-5 text-primary-foreground transition-transform group-hover:-translate-y-0.5 group-hover:scale-110" />
+            )}
+            <span>{isUploading ? 'Uploading…' : 'Upload Photos'}</span>
+          </button>
+          <button
+            onClick={handleAdd}
+            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#D4AF37] to-[#F4D03F] text-black rounded-lg hover:shadow-[0_0_30px_rgba(122,86,46,0.3)] transition-all"
+          >
+            <Plus className="w-5 h-5" />
+            Add by URL
+          </button>
+        </div>
       </div>
 
-      {/* Note about Supabase Storage */}
-      <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4">
-        <div className="flex items-start gap-3">
-          <Upload className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
-          <div className="text-sm">
-            <p className="text-blue-400 mb-1">Image Upload</p>
-            <p className="text-gray-400">Upload images directly (stored in MongoDB).</p>
-          </div>
+      <div className="bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] rounded-xl border border-[#D4AF37]/20 p-4 flex items-center justify-between gap-4">
+        <div className="text-sm text-gray-400">
+          Homepage featured: <span className="text-[#F5F5F5]">{featuredCount}</span>/4
         </div>
+        <div className="text-xs text-gray-500">Use the star on images to choose which 4 show on the landing page.</div>
       </div>
 
       {/* Upload */}
@@ -122,18 +175,33 @@ export default function GalleryManager() {
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-400 mb-2">File</label>
-            <input
-              type="file"
-              accept="image/*"
-              disabled={isUploading}
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) handleUpload(f);
-                e.target.value = '';
+            <label className="block text-sm text-gray-400 mb-2">Drop / Select</label>
+            <div
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={(e) => {
+                e.preventDefault();
+                if (isUploading) return;
+                if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                  handleUpload(e.dataTransfer.files);
+                }
               }}
-              className="w-full text-gray-300 text-sm"
-            />
+              className="w-full rounded-lg border border-[#D4AF37]/20 bg-[#0A0A0A]/30 px-4 py-3 text-sm text-gray-300"
+            >
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2 min-w-0">
+                  <Upload className="w-4 h-4 text-[#D4AF37]" />
+                  <span className="truncate">Drop images here or click Upload</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploading}
+                  className="group droplet-btn px-3 py-1.5 rounded-md border border-primary/30 text-primary hover:bg-primary/10 hover:shadow-sm hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-60 disabled:hover:scale-100 disabled:cursor-not-allowed"
+                >
+                  Choose
+                </button>
+              </div>
+            </div>
             {isUploading && <div className="text-xs text-gray-500 mt-2">Uploading...</div>}
           </div>
         </div>
@@ -162,6 +230,18 @@ export default function GalleryManager() {
               }}
             />
 
+            <button
+              onClick={() => toggleFeatured(image)}
+              className={`absolute top-3 left-3 z-10 p-2 rounded-lg backdrop-blur-md border transition-all ${
+                image.isFeatured
+                  ? 'bg-[#D4AF37]/25 border-[#D4AF37]/40 text-[#D4AF37]'
+                  : 'bg-black/30 border-white/15 text-white/80 hover:text-white'
+              }`}
+              title={image.isFeatured ? 'Featured on homepage' : 'Not featured'}
+            >
+              <Star className={`w-4 h-4 ${image.isFeatured ? 'fill-current' : ''}`} />
+            </button>
+
             {/* Overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4">
               <p className="text-white text-sm mb-3 line-clamp-2">{image.title}</p>
@@ -179,7 +259,7 @@ export default function GalleryManager() {
         {images.length === 0 && (
           <div className="col-span-full text-center py-12 text-gray-400">
             <ImageIcon className="w-16 h-16 mx-auto mb-4 opacity-20" />
-            <p>No images in gallery. Click "Add Image" to upload one.</p>
+            <p>No images in gallery. Click "Upload Photos" to add some.</p>
           </div>
         )}
       </div>
