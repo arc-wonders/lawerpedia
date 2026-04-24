@@ -299,7 +299,7 @@ async def _self_ping_loop() -> None:
 
     url = base.rstrip("/") + "/health"
     interval_s = int(os.getenv("SELF_PING_INTERVAL_SECONDS", "600"))
-    interval_s = max(60, interval_s)
+    interval_s = max(30, interval_s)
 
     # Small jitter so multiple instances don't sync up.
     await asyncio.sleep(random.randint(5, 20))
