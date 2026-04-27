@@ -49,9 +49,11 @@ export default function ArticlesPage() {
             <h1 className="text-xl sm:text-2xl" style={{ fontFamily: 'Playfair Display, serif', fontWeight: '600' }}>
               Articles & Updates
             </h1>
-            <p className="text-sm text-muted-foreground">All posts from LawyerPedia</p>
+            <p className="text-sm text-muted-foreground">All posts from TheLawyerpedia</p>
           </div>
-          <Link to="/" className="text-sm text-primary hover:underline">Back to Home</Link>
+          <div className="flex items-center gap-4">
+            <Link to="/" className="text-sm text-primary hover:underline">Back to Home</Link>
+          </div>
         </div>
       </div>
 
@@ -134,4 +136,3 @@ export default function ArticlesPage() {
     </div>
   );
 }
-

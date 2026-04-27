@@ -40,7 +40,7 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
               <Scale className="w-12 h-12 text-[#D4AF37]" />
               <div className="absolute -inset-2 bg-[#D4AF37]/10 rounded-full blur-md -z-10" />
             </div>
-            <span className="text-3xl text-[#F5F5F5]" style={{ fontFamily: 'Playfair Display, serif' }}>LawyerPedia</span>
+            <span className="text-3xl text-[#F5F5F5]" style={{ fontFamily: 'Playfair Display, serif' }}>TheLawyerpedia</span>
           </div>
           <h1 className="text-2xl text-[#F5F5F5] mb-2" style={{ fontFamily: 'Playfair Display, serif' }}>Admin Dashboard</h1>
           <p className="text-gray-400 text-sm">Please login to continue</p>

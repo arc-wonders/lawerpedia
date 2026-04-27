@@ -25,7 +25,7 @@ export default function AdminDashboard({ onLogout, onBackToSite }: AdminDashboar
                 <div className="absolute -inset-2 bg-[#D4AF37]/10 rounded-full blur-md -z-10" />
               </div>
               <div>
-                <h1 className="text-xl text-[#F5F5F5]" style={{ fontFamily: 'Playfair Display, serif' }}>LawyerPedia Admin</h1>
+                <h1 className="text-xl text-[#F5F5F5]" style={{ fontFamily: 'Playfair Display, serif' }}>TheLawyerpedia Admin</h1>
                 <p className="text-xs text-gray-400">Content Management Dashboard</p>
               </div>
             </div>

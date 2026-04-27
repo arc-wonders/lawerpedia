@@ -101,6 +101,7 @@ def media_url(request: Request, media_id: ObjectId) -> str:
 def map_conclave(doc: Dict[str, Any]) -> Dict[str, Any]:
     return {
         "id": str(doc["_id"]),
+        "slug": doc.get("slug"),
         "title": doc.get("title"),
         "date": doc.get("date"),
         "status": doc.get("status"),
@@ -110,6 +111,8 @@ def map_conclave(doc: Dict[str, Any]) -> Dict[str, Any]:
         "highlights": doc.get("highlights") or [],
         "venue": doc.get("venue"),
         "time": doc.get("time"),
+        "journeyIndex": doc.get("journeyIndex"),
+        "journeyMeta": doc.get("journeyMeta"),
         "createdAt": doc.get("createdAt"),
         "updatedAt": doc.get("updatedAt"),
     }
@@ -195,6 +198,9 @@ class ConclaveBody(BaseModel):
     highlights: List[str] = Field(default_factory=list)
     venue: str
     time: str
+    slug: Optional[str] = None
+    journeyIndex: Optional[int] = None
+    journeyMeta: Optional[str] = None
 
 
 class ConsultationCreateBody(BaseModel):
@@ -326,110 +332,196 @@ async def get_db() -> AsyncIOMotorDatabase:
 
 async def ensure_seed_data(db: AsyncIOMotorDatabase) -> None:
     conclaves_col = db["conclaves"]
-    count = await conclaves_col.count_documents({})
-    ts = now_iso()
-    if count == 0:
-        await conclaves_col.insert_many(
-            [
-                {
-                    "title": "Legal Awareness Conclave 2026",
-                    "date": "June 15, 2026",
-                    "status": "upcoming",
-                    "attendees": "Expected 600+",
-                    "description": "A comprehensive event covering consumer rights, criminal law basics, and legal remedies for common issues.",
-                    "fullDescription": "Join us for India's premier legal awareness conclave, designed to empower individuals with knowledge of their legal rights and remedies. This comprehensive event will feature expert speakers, interactive workshops, and networking opportunities with legal professionals from across the country.",
-                    "highlights": [
-                        "Expert panel discussions on consumer protection laws",
-                        "Interactive workshops on criminal law basics",
-                        "Legal aid clinic with free consultations",
-                        "Networking opportunities with legal professionals",
-                        "Certificate of participation",
-                    ],
-                    "venue": "India Habitat Centre, New Delhi",
-                    "time": "9:00 AM - 6:00 PM",
-                    "createdAt": ts,
-                    "updatedAt": ts,
-                },
-                {
-                    "title": "Corporate Law Summit 2025",
-                    "date": "November 12, 2025",
-                    "status": "past",
-                    "attendees": "500+",
-                    "description": "Successfully conducted summit on startup legal compliance, attended by 500+ entrepreneurs and legal professionals.",
-                    "fullDescription": "Our Corporate Law Summit brought together leading entrepreneurs, legal experts, and policymakers to discuss the evolving landscape of startup legal compliance in India. The event featured keynote speeches, panel discussions, and hands-on workshops.",
-                    "highlights": [
-                        "Keynote by prominent startup lawyers",
-                        "Panel on recent regulatory changes",
-                        "Workshops on incorporation and compliance",
-                        "Investor-founder legal relationship sessions",
-                        "Networking with 500+ attendees",
-                    ],
-                    "venue": "The Leela Ambience, Gurugram",
-                    "time": "Full Day Event",
-                    "createdAt": ts,
-                    "updatedAt": ts,
-                },
-                {
-                    "title": "Women's Legal Rights Workshop",
-                    "date": "August 20, 2025",
-                    "status": "past",
-                    "attendees": "300+",
-                    "description": "Empowering workshop focusing on women's legal rights, property laws, and domestic violence protection.",
-                    "fullDescription": "An empowering day dedicated to educating women about their legal rights in India. This workshop covered crucial topics including property rights, matrimonial laws, workplace harassment, and domestic violence protection mechanisms.",
-                    "highlights": [
-                        "Sessions on property and inheritance rights",
-                        "Understanding domestic violence laws",
-                        "Workplace harassment prevention",
-                        "Legal aid resources and support systems",
-                        "One-on-one legal counseling",
-                    ],
-                    "venue": "India International Centre, New Delhi",
-                    "time": "10:00 AM - 5:00 PM",
-                    "createdAt": ts,
-                    "updatedAt": ts,
-                },
-            ]
+
+    # Make seeding idempotent. Keep user-created conclaves intact, but remove the old demo titles if present.
+    await conclaves_col.create_index("slug", unique=True, sparse=True)
+    await conclaves_col.delete_many(
+        {
+            "title": {
+                "$in": [
+                    "Legal Awareness Conclave 2026",
+                    "Corporate Law Summit 2025",
+                    "Women's Legal Rights Workshop",
+                ]
+            }
+        }
+    )
+
+    tlp_conclaves = [
+        {
+            "slug": "tlp-conclave-1",
+            "journeyIndex": 1,
+            "journeyMeta": "8 March 2026",
+            "title": "1st TLP Conclave",
+            "date": "8 March 2026",
+            "status": "past",
+            "attendees": "9",
+            "description": "An intimate gathering of 9 lawyers focused on open dialogue, sharing experiences, and understanding the realities of legal practice beyond formal environments.",
+            "fullDescription": "An intimate gathering of 9 lawyers focused on open dialogue, sharing experiences, and understanding the realities of legal practice beyond formal environments.",
+            "highlights": [],
+            "venue": "Venue not specified",
+            "time": "Not specified",
+        },
+        {
+            "slug": "tlp-conclave-2",
+            "journeyIndex": 2,
+            "journeyMeta": "25 April 2026 • Samrat Hotel, New Delhi",
+            "title": "2nd TLP Conclave",
+            "date": "25 April 2026",
+            "status": "past",
+            "attendees": "15",
+            "description": "Expanded to 15 lawyers—with conversations over tea or coffee, where discussions flowed naturally and connections were built effortlessly.",
+            "fullDescription": "Expanded to 15 lawyers—with conversations over tea or coffee, where discussions flowed naturally and connections were built effortlessly.",
+            "highlights": [],
+            "venue": "Samrat Hotel, New Delhi",
+            "time": "Not specified",
+        },
+    ]
+
+    for item in tlp_conclaves:
+        ts = now_iso()
+        await conclaves_col.update_one(
+            {"slug": item["slug"]},
+            {"$set": {**item, "updatedAt": ts}, "$setOnInsert": {"createdAt": ts}},
+            upsert=True,
         )
 
     articles_col = db["articles"]
-    articles_count = await articles_col.count_documents({})
-    if articles_count == 0:
-        await articles_col.insert_many(
-            [
-                {
-                    "title": "Understanding Your Rights in Consumer Disputes",
-                    "summary": "A practical guide to consumer protection laws, refunds, and dispute resolution steps.",
-                    "content": "Consumer disputes are common — from defective products to delayed services.\n\nThis article explains the basics of consumer rights, what documents to keep, and how to approach grievance redressal.\n\nIf you need help, book a consultation through LawyerPedia.",
-                    "kind": "article",
-                    "status": "published",
-                    "thumbnailUrl": None,
-                    "externalUrl": None,
-                    "createdAt": ts,
-                    "updatedAt": ts,
-                },
-                {
-                    "title": "Update: Free Legal Aid Camp (This Weekend)",
-                    "summary": "Join us for a free legal consultation drive with limited slots.",
-                    "content": "We are organizing a free legal aid camp this weekend.\n\nBring any relevant documents and be on time. Slots are limited and will be served on a first-come basis.",
-                    "kind": "update",
-                    "status": "published",
-                    "thumbnailUrl": None,
-                    "externalUrl": None,
-                    "createdAt": ts,
-                    "updatedAt": ts,
-                },
-                {
-                    "title": "Corporate Compliance Checklist for Startups",
-                    "summary": "A beginner-friendly compliance checklist for founders: filings, contracts, and risk basics.",
-                    "content": "Compliance can feel overwhelming when you're building.\n\nThis checklist covers essential filings, basic contract hygiene, and common mistakes to avoid.",
-                    "kind": "article",
-                    "status": "published",
-                    "thumbnailUrl": None,
-                    "externalUrl": None,
-                    "createdAt": ts,
-                    "updatedAt": ts,
-                },
-            ]
+
+    # Idempotent seed for baseline articles (avoid frontend hardcoding).
+    await articles_col.create_index("seedKey", unique=True, sparse=True)
+    await articles_col.delete_many(
+        {
+            "title": {
+                "$in": [
+                    "Understanding Your Rights in Consumer Disputes",
+                    "Update: Free Legal Aid Camp (This Weekend)",
+                    "Corporate Compliance Checklist for Startups",
+                ]
+            }
+        }
+    )
+
+    seed_articles = [
+        {
+            "seedKey": "article-ip-mistakes-startups",
+            "title": "5 Common IP Mistakes Startups Make (And How to Avoid Them)",
+            "summary": "Common intellectual-property pitfalls for startups and practical steps to avoid them, from audits and assignments to timing, searches, and international strategy.",
+            "kind": "article",
+            "status": "published",
+            "thumbnailUrl": None,
+            "externalUrl": None,
+            "content": (
+                "In the dynamic world of startups, intellectual property (IP) often becomes an overlooked asset until it's too late. Neglecting IP can lead to costly legal battles, loss of competitive advantage, and diminished investor confidence. Understanding and proactively managing IP is crucial for safeguarding your startup's innovations and brand identity.\n\n"
+                "1. Failing to Identify and Protect Existing IP Assets\n"
+                "The Mistake: Many startups overlook the IP they already possess, such as unique software code, branding elements, or proprietary processes.\n"
+                "Why It Matters: Unrecognized IP can be inadvertently exposed or unprotected, leading to potential theft or loss of exclusive rights.\n"
+                "How to Avoid It: Conduct a comprehensive IP audit early in your startup journey. Identify all potential IP assets and consult with IP professionals to determine the best protection strategies, whether through patents, trademarks, copyrights, or trade secrets.\n\n"
+                "2. Inadequate IP Assignment Agreements\n"
+                "The Mistake: Assuming that IP created by employees or contractors automatically belongs to the company.\n"
+                "Why It Matters: Without clear agreements, individuals may retain rights to critical IP, leading to disputes or loss of control over essential assets.\n"
+                "How to Avoid It: Implement robust IP assignment clauses in all employment and contractor agreements. Ensure that any IP developed is explicitly assigned to the company, preventing future ownership conflicts.\n\n"
+                "3. Public Disclosure Before Securing IP Protection\n"
+                "The Mistake: Revealing product details or innovations publicly before filing for IP protection.\n"
+                "Why It Matters: Public disclosure can jeopardize the novelty requirement for patents and may forfeit the ability to secure protection in certain jurisdictions.\n"
+                "How to Avoid It: File for the appropriate IP protection before any public disclosure, including pitches, publications, or product launches. Use non-disclosure agreements (NDAs) when discussing sensitive information with third parties.\n\n"
+                "4. Neglecting Comprehensive IP Searches\n"
+                "The Mistake: Failing to conduct thorough searches to ensure your IP doesn't infringe on existing rights.\n"
+                "Why It Matters: Infringing on another's IP can lead to legal disputes, financial penalties, and the need to rebrand or redesign products.\n"
+                "How to Avoid It: Perform detailed patent, trademark, and design searches before finalizing product designs or branding. This proactive approach helps avoid infringement issues and informs your IP strategy.\n\n"
+                "5. Overlooking International IP Protection\n"
+                "The Mistake: Securing IP rights only in the domestic market, ignoring international considerations.\n"
+                "Why It Matters: As your startup grows, entering new markets without IP protection can expose you to infringement and limit your ability to operate globally.\n"
+                "How to Avoid It: Develop an international IP strategy aligned with your business expansion plans. Consider using international treaties and agreements to streamline the process of securing IP rights in multiple jurisdictions.\n\n"
+                "Conclusion\n"
+                "Intellectual property is a cornerstone of a startup's value and competitive edge. By proactively identifying, protecting, and managing IP assets, startups can avoid common pitfalls that hinder growth and success. Engaging with IP professionals and integrating IP considerations into your business strategy ensures that your innovations remain secure and your startup is positioned for long-term success."
+            ),
+        },
+        {
+            "seedKey": "article-affirmative-action-quotas-ews",
+            "title": "Affirmative Action & Quotas – Review petitions pending on EWS and other reservation policies",
+            "summary": "A legal explainer on the EWS quota after Janhit Abhiyan (2022), the status of review petitions, and ongoing implementation litigation in High Courts.",
+            "kind": "article",
+            "status": "published",
+            "thumbnailUrl": None,
+            "externalUrl": None,
+            "content": (
+                "Introduction\n"
+                "The last decade has seen seismic shifts in Indian affirmative-action law. The One Hundred and Third Constitutional Amendment (2019) — which created a 10% reservation for Economically Weaker Sections (EWS) in education and public employment — produced one of the Supreme Court’s most contested reservation rulings in recent years. The constitutional questions it raised (and attendant litigation) sit at the intersection of Article 14, Articles 15 & 16, the “basic structure” doctrine, and the Court’s earlier reservation jurisprudence (notably Indra Sawhney). This article explains the legal background, summarizes the controlling Supreme Court disposition, describes the state of review/implementation litigation, analyzes unresolved issues, and outlines likely routes for further challenge or reform.\n\n"
+                "1. Legal background — principles that govern reservation law\n"
+                "Social vs. economic backwardness. Historically, the Court has treated reservation as a remedy for “socially and educationally backward” classes (caste-based disadvantage, structural social exclusion). Indra Sawhney v. Union of India (Mandal case) cemented this approach and framed important limits on affirmative action. The Mandal judgment also enunciated the “creamy layer” concept (for OBCs) and accepted a rough 50% ceiling on total quotas as a guiding principle.\n"
+                "Parliament’s 103rd Amendment (EWS). Parliament added Articles 15(6) and 16(6), authorising up to 10% reservation for economically weaker citizens, excluding SCs/STs/OBCs from that 10% slot. That shift raised the legal question whether reservation could be founded solely on economic criteria and whether the 50% ceiling is inviolable.\n\n"
+                "2. The Supreme Court’s ruling (Janhit Abhiyan v. Union of India) — the controlling decision\n"
+                "A five-judge bench delivered a split, but controlling, judgment in Janhit Abhiyan v. Union of India (decided Nov. 7, 2022). The Court (by a 3:2 majority) upheld the constitutional validity of the 103rd Amendment and approved a 10% EWS quota, holding that the Constitution permits reservation on economic grounds and that the Amendment did not violate the basic structure in the majority’s view. The judgment is fact-rich and fragmented — multiple separate opinions — and the dissenting judges expressed strong reservations about excluding historically disadvantaged classes (SC/ST/OBC) from EWS and about relying solely on economic criteria.\n"
+                "Load-bearing points (from the judgment and its aftermath):\n"
+                "The majority accepted that economic criteria can be a valid basis for classification for reservation.\n"
+                "The Court did not treat the 50% ceiling as an absolute, inflexible constitutional limit in the way Indra Sawhney had suggested; the majority allowed some flexibility while noting contextual restraints.\n\n"
+                "3. Review petitions and their disposition — what remains pending?\n"
+                "Review petitions to the Supreme Court: Following the Janhit Abhiyan judgment, review petitions were filed. The Supreme Court considered (and in many reported instances refused) to re-open the core holding. In mid-May 2023 the Court dismissed a clutch of review petitions seeking reconsideration of the 10% EWS ruling. The dismissal curtailed one obvious avenue of immediate challenge at the apex level.\n"
+                "Ongoing litigation on implementation and collateral issues: Even though the apex court upheld the Amendment, litigation continues on numerous implementation questions — for example:\n"
+                "Age-relaxation and related rules: High Courts have considered (and in some cases reversed or limited) EWS-related relaxations in recruitment notifications.\n"
+                "Applicability in running recruitments/retrospective effect: Several High Courts have refused to apply EWS to recruitment processes already underway or completed where the application forms did not collect EWS status.\n"
+                "Other reservation policy litigation: Separately, the Court’s recent interventions on subclassification within SC/ST quotas and other structural reforms produced review petitions that the Court has disposed of or declined to re-open.\n\n"
+                "4. Why petitions persist despite the apex judgment — legal and practical fault lines\n"
+                "Fragmented reasoning and narrow majorities. A 3:2 split and multiple separate opinions leave open interpretative ambiguities — e.g., range of permissible economic tests, whether states may combine EWS with other quotas, and whether the “exclusion” of SC/ST/OBC from EWS withstands all possible factual permutations. Those ambiguities incentivize further litigation.\n"
+                "Implementation details create justiciable disputes. What counts as an “EWS” qualification for a given recruitment — income cutoffs, asset tests, proof, interaction with existing relaxations (age, fees), and retrospective application — produce high-stakes litigation at High Court level.\n"
+                "Policy churn at state level. States may adopt differing approaches to EWS or to other quota expansions leading to fresh challenges under Indra Sawhney principles (50% ceiling debates) and under Article 14.\n\n"
+                "5. Strategic legal avenues open to litigants and the Court\n"
+                "Curative petitions and further review at the Supreme Court: Given that the apex court has already dismissed several review pleas, curative petitions (rare and narrowly entertained) remain theoretically available, but the hurdle is very high.\n"
+                "Targeted challenges to implementation rules: Litigants frequently obtain relief by challenging specific rules framed in exercise of the Amendment — e.g., the exact income threshold, asset tests, eligibility documentation, or exclusion rules — on grounds of arbitrariness, unequal treatment, or failure to follow delegated-legislation norms.\n"
+                "Legislative options: Parliament or state legislatures can refine the statutory/regulatory architecture for EWS, reducing litigation by clear, evidence-based rules.\n"
+                "Policy reform — using data to justify deviations from the “50%” benchmark: If governments wish to expand affirmative action beyond traditional ceilings, they will need robust empirical demonstrations of extraordinary circumstances.\n\n"
+                "6. Practical recommendations for practitioners, litigants and policy-makers\n"
+                "For petitioners (challenging EWS measures): Focus on discrete implementation defects rather than re-litigating settled constitutional lines unless new, compelling reasoning or factual matrices are available.\n"
+                "For respondents/government bodies: Bring detailed rule-making records into the record — socio-economic data, reasoned explanations for income/asset thresholds, and consistent verification mechanisms.\n"
+                "For the Supreme Court: A larger bench referral on whether economic criteria alone are constitutionally permissible in all contexts, and the doctrinal status of the 50% ceiling, could provide long-term clarity.\n\n"
+                "7. Concluding observations\n"
+                "The Janhit Abhiyan decision changed the legal landscape by validating a constitutionally authorised EWS quota; yet a mix of doctrinal division at the apex and a flood of implementation litigation means the law remains unsettled at the margins. Many review petitions that sought wholesale reversal were dismissed, but high-stakes questions about implementation, the interaction of EWS with existing quotas, and the broader normative story of affirmative action in India continue to animate courts and legislatures. For now the litigation strategy most likely to succeed is focused, evidence-driven challenge to specific rules and practices rather than broad constitutional re-argument — unless a clear vehicle for a larger bench is carved out."
+            ),
+        },
+        {
+            "seedKey": "article-amazon-one-click-patent",
+            "title": "Amazon One-Click Patent Case – Functional or Too Generic?",
+            "summary": "A look at Amazon’s One-Click patent controversy, the functionality vs. abstraction debate, key litigation, and why it would likely fail under India’s Section 3(k).",
+            "kind": "article",
+            "status": "published",
+            "thumbnailUrl": None,
+            "externalUrl": None,
+            "content": (
+                "In the late 1990s, Amazon revolutionized the way consumers shopped online by introducing its “One-Click” ordering system—a technology that allowed customers to make purchases with a single action, bypassing the traditional multi-step checkout process. The company secured a U.S. patent for this innovation in 1999 (U.S. Patent No. 5,960,411), sparking one of the most debated discussions in intellectual property law:\n"
+                "Can a simple business method, seemingly generic, qualify for patent protection?\n\n"
+                "The controversy surrounding the Amazon One-Click patent lies at the intersection of functionality and generality. While some hailed it as a pioneering e-commerce mechanism deserving protection, critics condemned it as overly broad, stifling competition and innovation.\n\n"
+                "In India, under Section 3(k) of the Patents Act, 1970, business methods and algorithms per se are not patentable. A case like “One-Click” would most likely be rejected here as too generic and falling under excluded subject matter.\n\n"
+                "Amazon’s One-Click patent essentially covered the process of:\n"
+                "Storing a customer’s billing and shipping information.\n"
+                "Allowing repeat purchases with a single click, without re-entering data.\n\n"
+                "The functional aspect was clear: streamlining online transactions and enhancing user convenience. However, opponents argued that the patent was too generic, as the method relied on existing technologies such as cookies and database management, which were not themselves novel.\n\n"
+                "In the year 1999, Amazon sued Barnes & Noble for infringing its One-Click patent through the latter’s “Express Lane” feature.\n"
+                "The U.S. Court of Appeals for the Federal Circuit initially upheld an injunction against Barnes & Noble, preventing it from using the system.\n"
+                "However, prolonged litigation and subsequent patent challenges questioned whether Amazon’s patent truly involved a non-obvious inventive step. This case drew sharp attention to the validity of business method patents, especially those that seemed to monopolize common place digital functions.\n\n"
+                "The central question is whether the One-Click patent represented a functional technological improvement or merely a generic idea applied online.\n\n"
+                "Arguments for Functionality\n"
+                "It provided a practical solution to a specific problem in e-commerce: repetitive and time-consuming checkout processes.\n"
+                "By enhancing user experience, it arguably promoted growth in online retail.\n"
+                "Courts initially acknowledged the innovation as more than an abstract idea.\n\n"
+                "Arguments for Genericness\n"
+                "The system primarily relied on known tools (cookies, stored user data) arranged in a predictable manner.\n"
+                "Granting exclusive rights risked monopolizing a basic commercial practice, hindering competitors from adopting similar convenience features.\n"
+                "Following the Supreme Court’s stricter approach to patent eligibility in Alice Corp. v. CLS Bank International (2014), many scholars argue the One-Click patent would likely not withstand scrutiny today.\n\n"
+                "Policy Implications\n"
+                "The Amazon One-Click case highlighted the tension between protecting genuine innovation and preventing overbroad monopolies. On one hand, granting patents for pioneering digital tools incentivizes businesses to invest in novel solutions. On the other, if patents are too broad, they can suppress competition and innovation in rapidly evolving fields like e-commerce and fintech. Ultimately, the patent expired in 2017, and the technology became public domain, opening the way for widespread adoption of single-click and frictionless payment systems.\n\n"
+                "Conclusion\n"
+                "The Amazon One-Click patent remains a landmark in the debate over functional innovation versus generic abstraction in patent law. While Amazon successfully leveraged it to dominate early e-commerce, legal scholars and practitioners continue to question whether it deserved patent protection in the first place. In retrospect, the case underscores the importance of balancing innovation incentives with fair competition, particularly in the digital era where seemingly simple ideas can have profound commercial impact."
+            ),
+        },
+    ]
+
+    for item in seed_articles:
+        ts = now_iso()
+        await articles_col.update_one(
+            {"seedKey": item["seedKey"]},
+            {"$set": {**item, "updatedAt": ts}, "$setOnInsert": {"createdAt": ts}},
+            upsert=True,
         )
 
 
@@ -804,7 +896,7 @@ async def admin_create_conclave(
     ts = now_iso()
     result = await db["conclaves"].insert_one(
         {
-            **body.model_dump(),
+            **body.model_dump(exclude_none=True),
             "highlights": [h for h in body.highlights if h],
             "createdAt": ts,
             "updatedAt": ts,
@@ -827,7 +919,7 @@ async def admin_update_conclave(
         {"_id": oid},
         {
             "$set": {
-                **body.model_dump(),
+                **body.model_dump(exclude_none=True),
                 "highlights": [h for h in body.highlights if h],
                 "updatedAt": ts,
             }
