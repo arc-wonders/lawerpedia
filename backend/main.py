@@ -37,6 +37,8 @@ JWT_SECRET = os.getenv("JWT_SECRET") or secrets.token_hex(48)
 JWT_ALG = "HS256"
 JWT_EXPIRES_DAYS = 7
 
+PING_SECRET = os.getenv("PING_SECRET", "").strip()
+
 CORS_ORIGIN = os.getenv("CORS_ORIGIN", "").strip()
 
 if not MONGODB_URL:
@@ -51,7 +53,7 @@ if not os.getenv("JWT_SECRET"):
 
 bearer = HTTPBearer(auto_error=False)
 
-_self_ping_task: Optional[asyncio.Task] = None
+_last_ping_time: Optional[datetime] = None
 
 
 def now_iso() -> str:
@@ -287,41 +289,6 @@ _db: Optional[AsyncIOMotorDatabase] = None
 
 def _truthy(value: str) -> bool:
     return value.strip().lower() in ("1", "true", "yes", "y", "on")
-
-
-async def _self_ping_loop() -> None:
-    enabled = _truthy(os.getenv("ENABLE_SELF_PING", "false"))
-    if not enabled:
-        return
-
-    base = (
-        os.getenv("SELF_PING_URL", "").strip()
-        or os.getenv("RENDER_EXTERNAL_URL", "").strip()
-        or os.getenv("PUBLIC_BASE_URL", "").strip()
-    )
-    if not base:
-        print("SELF_PING: ENABLED but no SELF_PING_URL/RENDER_EXTERNAL_URL/PUBLIC_BASE_URL set; skipping.")
-        return
-
-    url = base.rstrip("/") + "/health"
-    interval_s = int(os.getenv("SELF_PING_INTERVAL_SECONDS", "600"))
-    interval_s = max(30, interval_s)
-
-    # Small jitter so multiple instances don't sync up.
-    await asyncio.sleep(random.randint(5, 20))
-
-    while True:
-        try:
-            def _do_req():
-                req = urllib.request.Request(url, method="GET")
-                with urllib.request.urlopen(req, timeout=8) as resp:  # nosec - intentional keepalive ping
-                    _ = resp.read(128)
-
-            await asyncio.to_thread(_do_req)
-        except Exception as e:
-            print(f"SELF_PING: failed to ping {url}: {e}")
-
-        await asyncio.sleep(interval_s)
 
 
 async def get_db() -> AsyncIOMotorDatabase:
@@ -604,17 +571,10 @@ async def _startup() -> None:
     await ensure_admin_user(_db)
     await ensure_default_forms(_db)
 
-    global _self_ping_task
-    if _self_ping_task is None:
-        _self_ping_task = asyncio.create_task(_self_ping_loop())
-
 
 @app.on_event("shutdown")
 async def _shutdown() -> None:
-    global _mongo_client, _db, _self_ping_task
-    if _self_ping_task is not None:
-        _self_ping_task.cancel()
-        _self_ping_task = None
+    global _mongo_client, _db
     if _mongo_client is not None:
         _mongo_client.close()
     _mongo_client = None
@@ -628,6 +588,31 @@ async def health(db: AsyncIOMotorDatabase = Depends(get_db)) -> Dict[str, Any]:
         return {"ok": True}
     except Exception:
         raise HTTPException(status_code=500, detail="Unhealthy")
+
+
+@app.get("/internal/ping")
+async def internal_ping(request: Request) -> Dict[str, Any]:
+    global _last_ping_time
+
+    # Validate secret if set
+    if PING_SECRET:
+        incoming = request.headers.get("x-ping-secret")
+        if incoming != PING_SECRET:
+            raise HTTPException(status_code=401, detail="Unauthorized")
+
+    now = datetime.now(timezone.utc)
+
+    # Rate limiting: ignore if ping received too frequently (< 10 seconds)
+    if _last_ping_time and (now - _last_ping_time).total_seconds() < 10:
+        return {"ok": True, "skipped": True, "time": now.isoformat()}
+
+    _last_ping_time = now
+    ts = now.isoformat()
+
+    # Log ping for debugging/monitoring
+    print(f"PING received at {ts}")
+
+    return {"ok": True, "time": ts, "service": "lawerpedia"}
 
 
 @app.post("/api/auth/login")
