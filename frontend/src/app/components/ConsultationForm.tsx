@@ -167,12 +167,6 @@ export default function ConsultationForm({ onClose }: ConsultationFormProps) {
               />
             </div>
 
-            <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4 text-sm text-gray-400">
-              <p>
-                <strong className="text-blue-400">Note:</strong> Your request is saved securely to the backend. If submission fails, check that the API server is running.
-              </p>
-            </div>
-
             <div className="flex gap-4">
               <button
                 type="submit"

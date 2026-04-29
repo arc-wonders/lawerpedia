@@ -427,12 +427,12 @@ export default function MainSite() {
               <img
                 src={logoImage}
                 alt="TheLawyerpedia"
-                className="w-[52px] h-[52px] sm:w-[56px] sm:h-[56px] object-contain select-none rounded-xl"
+                className="w-[60px] h-[60px] sm:w-[64px] sm:h-[64px] object-contain select-none rounded-xl"
                 draggable={false}
                 onContextMenu={(e) => e.preventDefault()}
                 style={{ userSelect: 'none', WebkitUserSelect: 'none', MozUserSelect: 'none', filter: 'brightness(0.8)', opacity: 1 }}
               />
-              <span className="text-2xl text-foreground tracking-tight" style={{ fontFamily: 'Playfair Display, serif' }}>TheLawyerpedia</span>
+              <span className="text-[22px] sm:text-2xl text-foreground tracking-tight" style={{ fontFamily: 'Playfair Display, serif' }}>TheLawyerpedia</span>
             </div>
 
             <div className="hidden md:flex items-center gap-6 sm:p-5 sm:p-6 lg:p-8 lg:p-10">
@@ -442,7 +442,7 @@ export default function MainSite() {
               <a href="#contact" className="text-muted-foreground hover:text-primary transition-colors text-[15px]">Contact</a>
               <button
                 onClick={() => setShowConsultationForm(true)}
-                className="px-7 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 hover:shadow-[0_0_30px_rgba(122,86,46,0.25)] transition-all duration-300 hover:scale-105"
+                className="px-7 py-3 bg-transparent text-primary border border-primary/40 rounded-lg hover:bg-primary/10 hover:border-primary/60 transition-all duration-300"
               >
                 Book Consultation
               </button>
@@ -467,7 +467,7 @@ export default function MainSite() {
               <a href="#contact" className="block text-muted-foreground hover:text-primary py-2 text-[15px]">Contact</a>
               <button
                 onClick={() => { setShowConsultationForm(true); setMobileMenuOpen(false); }}
-                className="w-full px-7 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 hover:shadow-[0_0_30px_rgba(122,86,46,0.25)] transition-all"
+                className="w-full px-7 py-3 bg-transparent text-primary border border-primary/40 rounded-lg hover:bg-primary/10 hover:border-primary/60 transition-all"
               >
                 Book Consultation
               </button>
@@ -477,35 +477,36 @@ export default function MainSite() {
       </nav>
 
       {/* HERO SECTION */}
-      <section id="home" className="relative bg-background pt-16 sm:pt-20 lg:pt-24 pb-10 sm:pb-12 lg:pb-14 overflow-hidden z-10">
+      <section id="home" className="relative bg-background min-h-[80vh] py-[80px] flex flex-col items-center justify-center overflow-hidden z-10">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent" />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="flex flex-col items-start">
-            <div className="space-y-8 max-w-2xl">
-              <h1 className="text-foreground leading-[1.1] text-4xl sm:text-5xl lg:text-[4.5rem]" style={{ fontFamily: 'Playfair Display, serif', fontWeight: '600', letterSpacing: '-0.02em' }}>
-                TheLawyerpedia
-                <span className="block text-primary">Where legal minds connect</span>
-              </h1>
+        <div className="max-w-7xl mx-auto px-[40px] relative">
+          <div className="max-w-[700px] mx-auto text-center">
+            <div className="uppercase text-[13px] tracking-[2px] text-[#6B4C11]/70">
+              FOR LAWYERS &amp; LAW STUDENTS
+            </div>
 
-              <p className="text-muted-foreground text-base sm:text-lg leading-relaxed max-w-lg">
-                <span className="font-semibold text-foreground">
-                  TheLawyerpedia is a platform for lawyers and law students to network, learn, and build meaningful conversations.
-                </span>
-                <span className="block mt-3">
-                  Built to bridge the gap between lawyers and law students, we encourage open communication and break down complex legal concepts into simple, practical understanding.
-                </span>
-              </p>
+            <div className="w-[80px] h-px bg-[#6B4C11]/90 mx-auto mt-[18px]" />
 
-              <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                <button
-                  onClick={() => scrollToSection('conclaves')}
-                  className="px-8 py-4 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 hover:shadow-[0_0_40px_rgba(122,86,46,0.25)] transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 group droplet-btn"
-                >
-                  <span>Join Conclave</span>
-                  <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </button>
-              </div>
+            <h1
+              className="leading-[1.05] text-[#6B4C11] text-[46px] sm:text-[54px] lg:text-[58px] mt-[6px] lg:whitespace-nowrap max-w-[900px] mx-auto"
+              style={{ fontFamily: 'Playfair Display, serif', fontWeight: '600', letterSpacing: '-0.02em' }}
+            >
+              Where Legal Minds Connect
+            </h1>
+
+            <p className="mt-5 text-muted-foreground text-[16px] sm:text-[18px] leading-relaxed max-w-[520px] mx-auto">
+              TheLawyerpedia brings lawyers and law students together to network, learn, and have meaningful conversations—making complex legal concepts simpler and more practical.
+            </p>
+
+            <div className="mt-7 flex justify-center">
+              <button
+                onClick={() => scrollToSection('conclaves')}
+                className="px-10 py-4 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 hover:shadow-[0_0_40px_rgba(122,86,46,0.25)] transition-all duration-300 hover:scale-105 inline-flex items-center justify-center gap-2 group droplet-btn"
+              >
+                <span>Join the Community</span>
+                <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </button>
             </div>
           </div>
         </div>
@@ -549,13 +550,13 @@ export default function MainSite() {
               </div>
 
               <div className="space-y-6">
-                <p className="text-gray-400 text-base sm:text-lg leading-relaxed">
+                <p className="text-black text-base sm:text-lg leading-relaxed">
                   TheLawyerpedia is founded by Mehak Ahuja (Adv), BBA.LLB(H), LLM, who believes that the legal profession needs more accessible knowledge and authentic conversations.
                 </p>
-                <p className="text-gray-400 text-base sm:text-lg leading-relaxed">
+                <p className="text-black text-base sm:text-lg leading-relaxed">
                   As both a legal professional and a host, her vision has always been to create spaces where people feel comfortable sharing their experiences, asking questions, and learning without hesitation.
                 </p>
-                <p className="text-gray-400 text-base sm:text-lg leading-relaxed">
+                <p className="text-black text-base sm:text-lg leading-relaxed">
                   The focus is not just on teaching law, but on making it relatable, understandable, and connected to real-life experiences.
                 </p>
 
