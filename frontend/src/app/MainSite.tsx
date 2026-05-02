@@ -703,82 +703,106 @@ export default function MainSite() {
               <div className="w-24 h-px bg-gradient-to-r from-transparent to-[#D4AF37]" />
               <div className="w-24 h-px bg-gradient-to-l from-transparent to-[#D4AF37]" />
             </div>
-            <p className="text-gray-400 max-w-2xl mx-auto text-base sm:text-lg leading-relaxed">
+            <p className="text-black max-w-2xl mx-auto text-base sm:text-lg leading-relaxed">
               TLP represents clients across multiple forums, including the Supreme Court of India, various High Courts, and specialized tribunals—handling a diverse range of matters with a practical and solution-oriented approach.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 sm:p-6 lg:p-8">
-            <div className="p-6 sm:p-5 sm:p-6 lg:p-8 lg:p-10 bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 hover:shadow-[0_0_40px_rgba(212,175,55,0.2)] transition-all duration-300 hover:scale-105 group">
-              <div className="w-14 h-14 bg-gradient-to-br from-[#D4AF37]/20 to-[#D4AF37]/5 rounded-xl flex items-center justify-center mb-6 group-hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] transition-all border border-[#D4AF37]/30">
-                <Scale className="w-7 h-7 text-[#D4AF37] group-hover:scale-110 transition-transform" />
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            <div className="group bg-white/5 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/10 hover:border-[#D4AF37]/20 transition-colors duration-200">
+              <div className="p-6 sm:p-8 lg:p-10 space-y-6 border-b border-white/5">
+                <div className="w-14 h-14 bg-gradient-to-br from-[#D4AF37]/20 to-[#D4AF37]/5 rounded-xl flex items-center justify-center transition-all border border-[#D4AF37]/30">
+                  <Scale className="w-7 h-7 text-[#D4AF37] transition-transform" />
+                </div>
+                <div>
+                  <h3 className="mb-4 text-[#F5F5F5] text-xl sm:text-2xl" style={{ fontFamily: 'Playfair Display, serif' }}>Supreme Court & High Courts</h3>
+                  <ul className="text-gray-400 text-sm leading-relaxed space-y-2 list-disc pl-5">
+                    <li>Constitutional issues</li>
+                    <li>Civil and criminal appeals</li>
+                    <li>Writ petitions and Special Leave Petitions (SLPs)</li>
+                  </ul>
+                </div>
               </div>
-              <h3 className="mb-4 text-[#F5F5F5] text-xl sm:text-2xl" style={{ fontFamily: 'Playfair Display, serif' }}>Supreme Court & High Courts</h3>
-              <ul className="text-gray-400 text-sm leading-relaxed space-y-2 list-disc pl-5">
-                <li>Constitutional issues</li>
-                <li>Civil and criminal appeals</li>
-                <li>Writ petitions and Special Leave Petitions (SLPs)</li>
-              </ul>
             </div>
 
-            <div className="p-6 sm:p-5 sm:p-6 lg:p-8 lg:p-10 bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 hover:shadow-[0_0_40px_rgba(212,175,55,0.2)] transition-all duration-300 hover:scale-105 group">
-              <div className="w-14 h-14 bg-gradient-to-br from-[#D4AF37]/20 to-[#D4AF37]/5 rounded-xl flex items-center justify-center mb-6 group-hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] transition-all border border-[#D4AF37]/30">
-                <ClipboardCheck className="w-7 h-7 text-[#D4AF37] group-hover:scale-110 transition-transform" />
+            <div className="group bg-white/5 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/10 hover:border-[#D4AF37]/20 transition-colors duration-200">
+              <div className="p-6 sm:p-8 lg:p-10 space-y-6 border-b border-white/5">
+                <div className="w-14 h-14 bg-gradient-to-br from-[#D4AF37]/20 to-[#D4AF37]/5 rounded-xl flex items-center justify-center transition-all border border-[#D4AF37]/30">
+                  <ClipboardCheck className="w-7 h-7 text-[#D4AF37] transition-transform" />
+                </div>
+                <div>
+                  <h3 className="mb-4 text-[#F5F5F5] text-xl sm:text-2xl" style={{ fontFamily: 'Playfair Display, serif' }}>Arbitration & Dispute Resolution</h3>
+                  <ul className="text-gray-400 text-sm leading-relaxed space-y-2 list-disc pl-5">
+                    <li>Commercial and contractual disputes</li>
+                    <li>Domestic arbitration proceedings</li>
+                    <li>Enforcement of arbitral awards</li>
+                    <li>Pre-arbitration strategy and dispute management</li>
+                  </ul>
+                </div>
               </div>
-              <h3 className="mb-4 text-[#F5F5F5] text-xl sm:text-2xl" style={{ fontFamily: 'Playfair Display, serif' }}>Arbitration & Dispute Resolution</h3>
-              <ul className="text-gray-400 text-sm leading-relaxed space-y-2 list-disc pl-5">
-                <li>Commercial and contractual disputes</li>
-                <li>Domestic arbitration proceedings</li>
-                <li>Enforcement of arbitral awards</li>
-                <li>Pre-arbitration strategy and dispute management</li>
-              </ul>
             </div>
 
-            <div className="p-6 sm:p-5 sm:p-6 lg:p-8 lg:p-10 bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 hover:shadow-[0_0_40px_rgba(212,175,55,0.2)] transition-all duration-300 hover:scale-105 group">
-              <div className="w-14 h-14 bg-gradient-to-br from-[#D4AF37]/20 to-[#D4AF37]/5 rounded-xl flex items-center justify-center mb-6 group-hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] transition-all border border-[#D4AF37]/30">
-                <Building2 className="w-7 h-7 text-[#D4AF37] group-hover:scale-110 transition-transform" />
+            <div className="group bg-white/5 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/10 hover:border-[#D4AF37]/20 transition-colors duration-200">
+              <div className="p-6 sm:p-8 lg:p-10 space-y-6 border-b border-white/5">
+                <div className="w-14 h-14 bg-gradient-to-br from-[#D4AF37]/20 to-[#D4AF37]/5 rounded-xl flex items-center justify-center transition-all border border-[#D4AF37]/30">
+                  <Building2 className="w-7 h-7 text-[#D4AF37] transition-transform" />
+                </div>
+                <div>
+                  <h3 className="mb-4 text-[#F5F5F5] text-xl sm:text-2xl" style={{ fontFamily: 'Playfair Display, serif' }}>Tribunals & DRT</h3>
+                  <ul className="text-gray-400 text-sm leading-relaxed space-y-2 list-disc pl-5">
+                    <li>Debt Recovery Tribunal (DRT) and other quasi-judicial authorities</li>
+                    <li>Recovery proceedings and enforcement actions</li>
+                    <li>Banking and financial disputes</li>
+                  </ul>
+                </div>
               </div>
-              <h3 className="mb-4 text-[#F5F5F5] text-xl sm:text-2xl" style={{ fontFamily: 'Playfair Display, serif' }}>Tribunals & DRT</h3>
-              <ul className="text-gray-400 text-sm leading-relaxed space-y-2 list-disc pl-5">
-                <li>Debt Recovery Tribunal (DRT) and other quasi-judicial authorities</li>
-                <li>Recovery proceedings and enforcement actions</li>
-                <li>Banking and financial disputes</li>
-              </ul>
             </div>
 
-            <div className="p-6 sm:p-5 sm:p-6 lg:p-8 lg:p-10 bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 hover:shadow-[0_0_40px_rgba(212,175,55,0.2)] transition-all duration-300 hover:scale-105 group">
-              <div className="w-14 h-14 bg-gradient-to-br from-[#D4AF37]/20 to-[#D4AF37]/5 rounded-xl flex items-center justify-center mb-6 group-hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] transition-all border border-[#D4AF37]/30">
-                <Award className="w-7 h-7 text-[#D4AF37] group-hover:scale-110 transition-transform" />
+            <div className="group bg-white/5 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/10 hover:border-[#D4AF37]/20 transition-colors duration-200">
+              <div className="p-6 sm:p-8 lg:p-10 space-y-6 border-b border-white/5">
+                <div className="w-14 h-14 bg-gradient-to-br from-[#D4AF37]/20 to-[#D4AF37]/5 rounded-xl flex items-center justify-center transition-all border border-[#D4AF37]/30">
+                  <Award className="w-7 h-7 text-[#D4AF37] transition-transform" />
+                </div>
+                <div>
+                  <h3 className="mb-4 text-[#F5F5F5] text-xl sm:text-2xl" style={{ fontFamily: 'Playfair Display, serif' }}>Intellectual Property Rights (IPR)</h3>
+                  <ul className="text-gray-400 text-sm leading-relaxed space-y-2 list-disc pl-5">
+                    <li>Trademark registration and prosecution</li>
+                    <li>Objections and opposition proceedings</li>
+                    <li>Brand protection and infringement matters</li>
+                  </ul>
+                </div>
               </div>
-              <h3 className="mb-4 text-[#F5F5F5] text-xl sm:text-2xl" style={{ fontFamily: 'Playfair Display, serif' }}>Intellectual Property Rights (IPR)</h3>
-              <ul className="text-gray-400 text-sm leading-relaxed space-y-2 list-disc pl-5">
-                <li>Trademark registration and prosecution</li>
-                <li>Objections and opposition proceedings</li>
-                <li>Brand protection and infringement matters</li>
-              </ul>
             </div>
 
-            <div className="p-6 sm:p-5 sm:p-6 lg:p-8 lg:p-10 bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 hover:shadow-[0_0_40px_rgba(212,175,55,0.2)] transition-all duration-300 hover:scale-105 group">
-              <div className="w-14 h-14 bg-gradient-to-br from-[#D4AF37]/20 to-[#D4AF37]/5 rounded-xl flex items-center justify-center mb-6 group-hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] transition-all border border-[#D4AF37]/30">
-                <Users className="w-7 h-7 text-[#D4AF37] group-hover:scale-110 transition-transform" />
+            <div className="group bg-white/5 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/10 hover:border-[#D4AF37]/20 transition-colors duration-200">
+              <div className="p-6 sm:p-8 lg:p-10 space-y-6 border-b border-white/5">
+                <div className="w-14 h-14 bg-gradient-to-br from-[#D4AF37]/20 to-[#D4AF37]/5 rounded-xl flex items-center justify-center transition-all border border-[#D4AF37]/30">
+                  <Users className="w-7 h-7 text-[#D4AF37] transition-transform" />
+                </div>
+                <div>
+                  <h3 className="mb-4 text-[#F5F5F5] text-xl sm:text-2xl" style={{ fontFamily: 'Playfair Display, serif' }}>Matrimonial & Family Law</h3>
+                  <ul className="text-gray-400 text-sm leading-relaxed space-y-2 list-disc pl-5">
+                    <li>Divorce and separation</li>
+                    <li>Maintenance and alimony</li>
+                    <li>Child custody and family disputes</li>
+                  </ul>
+                </div>
               </div>
-              <h3 className="mb-4 text-[#F5F5F5] text-xl sm:text-2xl" style={{ fontFamily: 'Playfair Display, serif' }}>Matrimonial & Family Law</h3>
-              <ul className="text-gray-400 text-sm leading-relaxed space-y-2 list-disc pl-5">
-                <li>Divorce and separation</li>
-                <li>Maintenance and alimony</li>
-                <li>Child custody and family disputes</li>
-              </ul>
             </div>
 
-            <div className="p-6 sm:p-5 sm:p-6 lg:p-8 lg:p-10 bg-gradient-to-br from-[#1A1A1A] to-[#0F0F0F] rounded-2xl border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 hover:shadow-[0_0_40px_rgba(212,175,55,0.2)] transition-all duration-300 hover:scale-105 group">
-              <div className="w-14 h-14 bg-gradient-to-br from-[#D4AF37]/20 to-[#D4AF37]/5 rounded-xl flex items-center justify-center mb-6 group-hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] transition-all border border-[#D4AF37]/30">
-                <FileText className="w-7 h-7 text-[#D4AF37] group-hover:scale-110 transition-transform" />
+            <div className="group bg-white/5 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/10 hover:border-[#D4AF37]/20 transition-colors duration-200">
+              <div className="p-6 sm:p-8 lg:p-10 space-y-6 border-b border-white/5">
+                <div className="w-14 h-14 bg-gradient-to-br from-[#D4AF37]/20 to-[#D4AF37]/5 rounded-xl flex items-center justify-center transition-all border border-[#D4AF37]/30">
+                  <FileText className="w-7 h-7 text-[#D4AF37] transition-transform" />
+                </div>
+                <div>
+                  <h3 className="mb-4 text-[#F5F5F5] text-xl sm:text-2xl" style={{ fontFamily: 'Playfair Display, serif' }}>Civil & Criminal Litigation</h3>
+                  <ul className="text-gray-400 text-sm leading-relaxed space-y-2 list-disc pl-5">
+                    <li>Contractual and commercial matters, property disputes, injunctions, and recovery suits</li>
+                    <li>Bail applications, trial proceedings, and criminal complaints/defense</li>
+                  </ul>
+                </div>
               </div>
-              <h3 className="mb-4 text-[#F5F5F5] text-xl sm:text-2xl" style={{ fontFamily: 'Playfair Display, serif' }}>Civil & Criminal Litigation</h3>
-              <ul className="text-gray-400 text-sm leading-relaxed space-y-2 list-disc pl-5">
-                <li>Contractual and commercial matters, property disputes, injunctions, and recovery suits</li>
-                <li>Bail applications, trial proceedings, and criminal complaints/defense</li>
-              </ul>
             </div>
           </div>
 
@@ -872,7 +896,7 @@ export default function MainSite() {
               <div className="w-24 h-px bg-gradient-to-r from-transparent to-[#D4AF37]" />
               <div className="w-24 h-px bg-gradient-to-l from-transparent to-[#D4AF37]" />
             </div>
-            <p className="text-gray-400 max-w-2xl mx-auto text-base sm:text-lg leading-relaxed">
+            <p className="text-black max-w-2xl mx-auto text-base sm:text-lg leading-relaxed">
               A signature initiative of TheLawyerpedia—designed to bring together lawyers and law students on a common platform for meaningful, engaging, and practical conversations.
             </p>
           </div>
