@@ -725,7 +725,7 @@ export default function MainSite() {
               </div>
             </div>
 
-            <div className="group bg-white/5 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/10 hover:border-[#D4AF37]/20 transition-colors duration-200">
+            <div className="group bg-white/5 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/10 hover:border-[#D4AF37]/20 transition-colors duration-200 md:pl-6 md:border-l md:border-[#D4AF37]/25">
               <div className="p-6 sm:p-8 lg:p-10 space-y-6 border-b border-white/5">
                 <div className="w-14 h-14 bg-gradient-to-br from-[#D4AF37]/20 to-[#D4AF37]/5 rounded-xl flex items-center justify-center transition-all border border-[#D4AF37]/30">
                   <ClipboardCheck className="w-7 h-7 text-[#D4AF37] transition-transform" />
@@ -742,7 +742,7 @@ export default function MainSite() {
               </div>
             </div>
 
-            <div className="group bg-white/5 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/10 hover:border-[#D4AF37]/20 transition-colors duration-200">
+            <div className="group bg-white/5 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/10 hover:border-[#D4AF37]/20 transition-colors duration-200 lg:pl-6 lg:border-l lg:border-[#D4AF37]/25 md:pl-0 md:border-l-0">
               <div className="p-6 sm:p-8 lg:p-10 space-y-6 border-b border-white/5">
                 <div className="w-14 h-14 bg-gradient-to-br from-[#D4AF37]/20 to-[#D4AF37]/5 rounded-xl flex items-center justify-center transition-all border border-[#D4AF37]/30">
                   <Building2 className="w-7 h-7 text-[#D4AF37] transition-transform" />
@@ -774,7 +774,7 @@ export default function MainSite() {
               </div>
             </div>
 
-            <div className="group bg-white/5 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/10 hover:border-[#D4AF37]/20 transition-colors duration-200">
+            <div className="group bg-white/5 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/10 hover:border-[#D4AF37]/20 transition-colors duration-200 md:pl-6 md:border-l md:border-[#D4AF37]/25">
               <div className="p-6 sm:p-8 lg:p-10 space-y-6 border-b border-white/5">
                 <div className="w-14 h-14 bg-gradient-to-br from-[#D4AF37]/20 to-[#D4AF37]/5 rounded-xl flex items-center justify-center transition-all border border-[#D4AF37]/30">
                   <Users className="w-7 h-7 text-[#D4AF37] transition-transform" />
@@ -790,7 +790,7 @@ export default function MainSite() {
               </div>
             </div>
 
-            <div className="group bg-white/5 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/10 hover:border-[#D4AF37]/20 transition-colors duration-200">
+            <div className="group bg-white/5 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/10 hover:border-[#D4AF37]/20 transition-colors duration-200 lg:pl-6 lg:border-l lg:border-[#D4AF37]/25 md:pl-0 md:border-l-0">
               <div className="p-6 sm:p-8 lg:p-10 space-y-6 border-b border-white/5">
                 <div className="w-14 h-14 bg-gradient-to-br from-[#D4AF37]/20 to-[#D4AF37]/5 rounded-xl flex items-center justify-center transition-all border border-[#D4AF37]/30">
                   <FileText className="w-7 h-7 text-[#D4AF37] transition-transform" />
