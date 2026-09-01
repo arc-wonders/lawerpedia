@@ -43,6 +43,7 @@ export default function ArticlesPage() {
                     <span>Article</span>
                     <span className="ml-auto">{date}</span>
                   </div>
+                  <div className="text-xs text-muted-foreground mb-2">By {a.author}</div>
                   <h3 className="text-lg text-foreground mb-2" style={{ fontFamily: 'Playfair Display, serif' }}>
                     {a.title}
                   </h3>

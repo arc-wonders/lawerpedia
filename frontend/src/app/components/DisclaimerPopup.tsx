@@ -16,7 +16,7 @@ export default function DisclaimerPopup({ onAgree }: Props) {
       <div className="relative max-w-7xl mx-auto px-6 sm:px-12 lg:px-16 pt-10 sm:pt-14 pb-16">
 
         {/* Brand */}
-        <div className="flex items-center gap-3 mb-12">
+        <div className="flex items-center gap-3 mb-8">
           <img
             src={logoImage}
             alt="TheLawyerpedia"
@@ -32,21 +32,21 @@ export default function DisclaimerPopup({ onAgree }: Props) {
         </div>
 
         {/* Heading */}
-        <div className="mb-10">
-          <div className="inline-flex items-center justify-center w-11 h-11 rounded-full border border-primary/25 mb-4">
+        <div className="mb-6">
+          <div className="inline-flex items-center justify-center w-11 h-11 rounded-full border border-primary/25 mb-3">
             <Scale className="w-5 h-5 text-primary" />
           </div>
           <h1
-            className="text-2xl sm:text-3xl text-foreground"
+            className="text-xl sm:text-2xl text-foreground"
             style={{ fontFamily: 'Playfair Display, serif', fontWeight: '600' }}
           >
             Disclaimer
           </h1>
-          <div className="w-14 h-px bg-primary/40 mt-4" />
+          <div className="w-14 h-px bg-primary/40 mt-3" />
         </div>
 
         {/* Body */}
-        <div className="text-[15px] leading-[1.85] text-muted-foreground space-y-5 mb-12">
+        <div className="text-[12px] leading-[1.5] text-muted-foreground space-y-2.5 mb-8">
           <p>
             The Bar Council of India prohibits the developing of the website for the advertisement by an Advocate.
           </p>
@@ -67,7 +67,7 @@ export default function DisclaimerPopup({ onAgree }: Props) {
             As per the rules of the Bar Council of India, Advocates are not permitted to solicit or advertise their work. By clicking on "I Agree" below, the user (you) acknowledges the following:
           </p>
 
-          <ul className="space-y-3 list-disc pl-6">
+          <ul className="space-y-1.5 list-disc pl-6">
             <li>There exists no sort of advertisement, personal communication, solicitation, invitation or inducement of any sort whatsoever from us or any of our members, and we are not soliciting any work through this website.</li>
             <li>The user deliberately wishes to get more information about us for his/her own information, use and voluntary will.</li>
             <li>The information, if any, that may be provided to the user by us would have been provided upon the user's specific request, and any such information obtained, retained or downloaded from this website is absolutely the act of volition of the user. Any transmission, receipt or use of information or links to this site would not create any lawyer-client relationship.</li>

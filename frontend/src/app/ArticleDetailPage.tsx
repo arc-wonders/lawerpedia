@@ -31,6 +31,8 @@ export default function ArticleDetailPage() {
         <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground mb-3">
           <span className="px-2 py-0.5 rounded-full border border-border bg-card">Article</span>
           <span>{date}</span>
+          <span>•</span>
+          <span>By {item.author}</span>
         </div>
 
         <h1 className="text-3xl sm:text-4xl mb-3" style={{ fontFamily: 'Playfair Display, serif', fontWeight: '600' }}>
