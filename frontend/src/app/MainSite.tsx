@@ -300,8 +300,8 @@ export default function MainSite() {
               <div className="text-xs sm:text-sm text-muted-foreground mt-1">Practice Areas</div>
             </div>
             <div>
-              <div className="text-2xl sm:text-3xl text-foreground" style={{ fontFamily: 'Playfair Display, serif', fontWeight: '600' }}>SC & HCs</div>
-              <div className="text-xs sm:text-sm text-muted-foreground mt-1">Courts Represented</div>
+              <div className="text-2xl sm:text-3xl text-foreground" style={{ fontFamily: 'Playfair Display, serif', fontWeight: '600' }}>Pan-India</div>
+              <div className="text-xs sm:text-sm text-muted-foreground mt-1">Court Presence</div>
             </div>
             <div>
               <div className="text-2xl sm:text-3xl text-foreground" style={{ fontFamily: 'Playfair Display, serif', fontWeight: '600' }}>TLP</div>
@@ -566,15 +566,15 @@ export default function MainSite() {
                     <Mail className="w-4 h-4 text-[#D4AF37]" />
                   </div>
                   <div>
-                    <p className="text-gray-400 text-sm hover:text-[#D4AF37] transition-colors">contact@lawyerpedia.com</p>
-                    <p className="text-gray-400 text-sm hover:text-[#D4AF37] transition-colors">mehak@lawyerpedia.com</p>
+                    <p className="text-gray-400 text-sm hover:text-[#D4AF37] transition-colors">Thelawyerpedia@gmail.com</p>
+                    <p className="text-gray-400 text-sm hover:text-[#D4AF37] transition-colors">Advocatemehakahuja@gmail.com</p>
                   </div>
                 </li>
                 <li className="flex items-start gap-3">
                   <div className="w-10 h-10 bg-gradient-to-br from-[#D4AF37]/20 to-[#D4AF37]/5 rounded-lg flex items-center justify-center flex-shrink-0 border border-[#D4AF37]/30">
                     <Phone className="w-4 h-4 text-[#D4AF37]" />
                   </div>
-                  <p className="text-gray-400 text-sm hover:text-[#D4AF37] transition-colors mt-2">+91 98765 43210</p>
+                  <p className="text-gray-400 text-sm hover:text-[#D4AF37] transition-colors mt-2">+91 8750694783</p>
                 </li>
                 <li className="flex items-start gap-3">
                   <div className="w-10 h-10 bg-gradient-to-br from-[#D4AF37]/20 to-[#D4AF37]/5 rounded-lg flex items-center justify-center flex-shrink-0 border border-[#D4AF37]/30">

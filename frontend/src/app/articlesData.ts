@@ -4,6 +4,7 @@ export interface Article {
   summary: string;
   content: string;
   createdAt: string;
+  author: string;
 }
 
 export const articles: Article[] = [
@@ -12,6 +13,7 @@ export const articles: Article[] = [
     title: 'Data Privacy in the Age of Artificial Intelligence: A Global Legal Reckoning',
     summary: 'Examining how the world\'s major legal systems are responding to the intersection of artificial intelligence and personal data — and where the law is still catching up.',
     createdAt: '2026-08-15',
+    author: 'aawath',
     content: `Every second, billions of data points are generated, harvested, processed, and monetised, often without the meaningful knowledge or consent of the individuals they describe. In 2024 alone, global regulators issued fines totalling more than €4 billion for data protection violations. And yet, the intersection of artificial intelligence and personal data remains one of the most under-regulated, legally ambiguous, and consequential frontiers of our time. This article examines how the world's major legal systems are responding and where the law is still catching up.
 
 I. The Regulatory Landscape: A Patchwork in Motion
@@ -69,6 +71,7 @@ The law is catching up. But in technology, catching up is rarely enough.`,
     title: 'Foreign Arbitral Awards in India: Why Indian Courts Cannot Set Them Aside',
     summary: 'Unpacking a frequently misunderstood legal reality: Indian courts do not possess the jurisdiction to "set aside" a foreign arbitral award — they can only enforce or refuse to enforce it.',
     createdAt: '2026-08-10',
+    author: 'aawath',
     content: `In the world of international commercial arbitration, few misconceptions are as consequential and as common as the belief that a foreign arbitral award can be challenged before Indian courts in the same manner as a domestic one. This article unpacks a straightforward but frequently misunderstood legal reality: Indian courts do not possess the jurisdiction to "set aside" a foreign arbitral award. What they can do is enforce it, or refuse to enforce it, on a narrow and well-defined set of grounds.
 
 Understanding this distinction is not merely an academic exercise. It has significant practical consequences for litigants, corporate counsel, and arbitration practitioners operating across borders. The following analysis traces the statutory architecture of the Arbitration and Conciliation Act, 1996 ("the Act") and the Supreme Court of India's landmark jurisprudence on the subject.
@@ -150,6 +153,7 @@ For practitioners and parties alike, the message is unambiguous: when a foreign 
     title: 'The ₹16,600 Crore Game Changer: Unpacking the Legal Architecture of the RCB Mega-Acquisition',
     summary: 'Behind the most expensive franchise transaction in IPL history lies a rigorous multi-layered legal process drawing on corporate law, securities regulation, competition policy, and FEMA.',
     createdAt: '2026-08-05',
+    author: 'aawath',
     content: `When the final whistle blew on United Spirits Limited's ownership of Royal Challengers Bengaluru (RCB), it was not merely a cricket story. It was a landmark corporate event, one that instantly became the most expensive franchise transaction in Indian Premier League (IPL) history. At a staggering ₹16,600 crore (approximately USD 1.78 billion), the sale of RCB to a consortium led by the Aditya Birla Group, The Times of India Group, Bolt Ventures, and Blackstone has redrawn the boundaries of sports commerce in India.
 
 But behind the spectacle of a high-profile ownership change lies a rigorous and multi-layered legal process, one that draws on corporate law, securities regulation, competition policy, and foreign exchange management. For legal practitioners, corporate counsels, and business professionals, this deal is nothing short of a masterclass in Indian M&A law in action.

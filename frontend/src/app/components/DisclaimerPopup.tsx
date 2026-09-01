@@ -13,7 +13,7 @@ export default function DisclaimerPopup({ onAgree }: Props) {
     >
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/8 via-transparent to-transparent pointer-events-none" />
 
-      <div className="relative max-w-4xl mx-auto px-6 sm:px-10 pt-10 sm:pt-14 pb-16">
+      <div className="relative max-w-7xl mx-auto px-6 sm:px-12 lg:px-16 pt-10 sm:pt-14 pb-16">
 
         {/* Brand */}
         <div className="flex items-center gap-3 mb-12">
