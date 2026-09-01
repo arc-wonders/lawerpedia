@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { X, Menu, Scale, FileText, Users, Calendar, Instagram, Linkedin, Twitter, Mail, Phone, MapPin, Award, BookOpen, ChevronRight, Building2, ClipboardCheck } from 'lucide-react';
+import { X, Menu, Scale, FileText, Users, Calendar, Instagram, Linkedin, Twitter, Mail, Phone, MapPin, Award, BookOpen, ChevronRight, Building2, ClipboardCheck, MessageCircle, Send } from 'lucide-react';
 import { motion, useInView } from 'motion/react';
 import mehakImage from '../imports/ms.jpg';
 import logoImage from '../imports/logo.png';
@@ -133,30 +133,31 @@ export default function MainSite() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.1 }}
-                className="uppercase text-[12px] tracking-[2.5px] text-primary/70 mb-5"
+                className="text-[15px] text-primary/80 mb-3"
+                style={{ fontFamily: 'Inter, sans-serif', fontWeight: '500' }}
               >
-                For Lawyers &amp; Law Students
+                Adv. Mehak Ahuja
               </motion.div>
 
               <motion.h1
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7, delay: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
-                className="text-foreground text-[40px] sm:text-[50px] lg:text-[60px] leading-[1.05]"
+                className="text-foreground text-[40px] sm:text-[50px] lg:text-[56px] leading-[1.1]"
                 style={{ fontFamily: 'Playfair Display, serif', fontWeight: '600', letterSpacing: '-0.02em' }}
               >
-                Where Legal{' '}
-                <span className="text-primary">Minds</span>{' '}
-                Connect
+                Corporate, Commercial &{' '}
+                <span className="text-primary">Matrimonial</span>{' '}
+                Lawyer
               </motion.h1>
 
               <motion.p
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.55 }}
-                className="mt-6 text-muted-foreground text-[16px] sm:text-[17px] leading-relaxed max-w-md"
+                className="mt-6 text-muted-foreground text-[17px] leading-relaxed"
               >
-                TheLawyerpedia brings lawyers and law students together to network, learn, and have meaningful conversations—making complex legal concepts simpler and more practical.
+                Practical legal solutions for individuals and businesses.
               </motion.p>
 
               <motion.div
@@ -166,17 +167,21 @@ export default function MainSite() {
                 className="mt-8 flex flex-wrap items-center gap-4"
               >
                 <button
-                  onClick={() => scrollToSection('conclaves')}
-                  className="px-8 py-3.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 hover:shadow-[0_0_40px_rgba(122,86,46,0.25)] transition-all duration-300 hover:scale-105 inline-flex items-center justify-center gap-2 group droplet-btn"
+                  onClick={() => scrollToSection('consultation')}
+                  className="px-8 py-3.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 hover:shadow-[0_0_40px_rgba(122,86,46,0.25)] transition-all duration-300 hover:scale-105 inline-flex items-center justify-center gap-2"
+                  style={{ fontWeight: '500' }}
                 >
-                  <span>Join the Community</span>
-                  <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  Book a Consultation
                 </button>
                 <a
-                  href="#articles"
+                  href="https://wa.me/918750694783?text=Hi%2C%20I%20would%20like%20to%20discuss%20a%20legal%20matter%20with%20you."
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="px-8 py-3.5 text-primary border border-primary/30 rounded-lg hover:bg-primary/5 transition-all duration-300 inline-flex items-center gap-2"
+                  style={{ fontWeight: '500' }}
                 >
-                  Read Articles
+                  <MessageCircle className="w-5 h-5" />
+                  WhatsApp Me
                 </a>
               </motion.div>
             </div>
@@ -510,6 +515,94 @@ export default function MainSite() {
               </FadeIn>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* CONSULTATION FORM */}
+      <section id="consultation" className="py-16 sm:py-20 lg:py-24 bg-gradient-to-br from-background to-muted/20 relative overflow-hidden z-10">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,_var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent" />
+        
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <FadeIn className="text-center mb-12">
+            <h2 className="text-3xl sm:text-4xl text-foreground mb-4" style={{ fontFamily: 'Playfair Display, serif', fontWeight: '600' }}>
+              Tell us about your legal issue
+            </h2>
+            <p className="text-muted-foreground text-[16px]">
+              Fill out the form below and we'll get back to you within 24 hours
+            </p>
+          </FadeIn>
+
+          <FadeIn delay={0.2}>
+            <form className="space-y-6">
+              <div className="grid sm:grid-cols-2 gap-6">
+                <div>
+                  <label htmlFor="name" className="block text-sm font-medium text-foreground mb-2">Name</label>
+                  <input
+                    type="text"
+                    id="name"
+                    className="w-full px-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                    placeholder="Your full name"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="phone" className="block text-sm font-medium text-foreground mb-2">Phone Number</label>
+                  <input
+                    type="tel"
+                    id="phone"
+                    className="w-full px-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                    placeholder="+91 XXXXX XXXXX"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">Email</label>
+                <input
+                  type="email"
+                  id="email"
+                  className="w-full px-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                  placeholder="your.email@example.com"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="area" className="block text-sm font-medium text-foreground mb-2">Area of Law</label>
+                <select
+                  id="area"
+                  className="w-full px-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                >
+                  <option value="">Select an area</option>
+                  <option value="corporate">Corporate Law</option>
+                  <option value="commercial">Commercial Law</option>
+                  <option value="matrimonial">Matrimonial & Family Law</option>
+                  <option value="arbitration">Arbitration & Dispute Resolution</option>
+                  <option value="ipr">Intellectual Property Rights</option>
+                  <option value="civil">Civil Litigation</option>
+                  <option value="criminal">Criminal Litigation</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+
+              <div>
+                <label htmlFor="message" className="block text-sm font-medium text-foreground mb-2">Briefly describe your matter</label>
+                <textarea
+                  id="message"
+                  rows={5}
+                  className="w-full px-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all resize-none"
+                  placeholder="Please provide a brief overview of your legal issue..."
+                ></textarea>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full px-8 py-4 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 hover:shadow-[0_0_40px_rgba(122,86,46,0.25)] transition-all duration-300 inline-flex items-center justify-center gap-2 group"
+                style={{ fontWeight: '500' }}
+              >
+                <span>Request Consultation</span>
+                <Send className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </button>
+            </form>
+          </FadeIn>
         </div>
       </section>
 
